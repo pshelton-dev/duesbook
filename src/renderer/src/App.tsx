@@ -54,7 +54,7 @@ export default function App(): React.JSX.Element {
       </nav>
       <main className="content">
         {screen === 'home' ? (
-          <Home status={status} />
+          <Home status={status} onNavigate={setScreen} />
         ) : screen === 'ledger' ? (
           <Ledger />
         ) : screen === 'members' ? (

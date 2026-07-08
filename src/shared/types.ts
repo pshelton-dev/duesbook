@@ -253,6 +253,31 @@ export interface TreasurerReport {
   netCents: number
 }
 
+export interface HomeSummary {
+  accounts: AccountSummary[]
+  duesPeriodLabel: string | null
+  dues: {
+    collectedCents: number
+    outstandingCents: number
+    paidCount: number
+    expectedCount: number
+  } | null
+  recent: {
+    id: number
+    date: string
+    accountName: string
+    description: string
+    categoryName: string | null
+    amountCents: number
+  }[]
+  unallocatedCount: number
+}
+
+export interface UpdateInfo {
+  version: string
+  url: string
+}
+
 export interface DuesbookApi {
   getStatus: () => Promise<AppStatus>
   chooseBackupDir: () => Promise<string | null>
@@ -299,4 +324,7 @@ export interface DuesbookApi {
   setUpdateCheck: (enabled: boolean) => Promise<void>
   /** file picker + restore in one step (used on the wizard's welcome step); false if cancelled */
   chooseAndRestoreBackup: () => Promise<boolean>
+  getHomeSummary: () => Promise<HomeSummary>
+  /** null = up to date, disabled, or offline (never an error) */
+  checkForUpdate: () => Promise<UpdateInfo | null>
 }

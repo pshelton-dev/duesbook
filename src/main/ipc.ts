@@ -15,10 +15,12 @@ import { writeFileSync } from 'fs'
 import * as backup from './backup'
 import { getDbPath, getSchemaVersion, openDb } from './db'
 import * as dues from './dues'
+import { homeSummary } from './home'
 import * as ledger from './ledger'
 import * as members from './members'
 import { treasurerReport } from './reports'
 import * as settings from './settings'
+import { checkForUpdate } from './update'
 import { completeWizard } from './wizard'
 
 export function registerIpc(): void {
@@ -155,6 +157,9 @@ export function registerIpc(): void {
   ipcMain.handle('app:set-update-check', (_e, enabled: boolean) =>
     settings.setUpdateCheck(openDb(), enabled)
   )
+  ipcMain.handle('home:summary', () => homeSummary(openDb()))
+  ipcMain.handle('update:check', () => checkForUpdate(openDb()))
+
   ipcMain.handle('backup:choose-and-restore', async (): Promise<boolean> => {
     const result = await dialog.showOpenDialog({
       title: 'Restore from a backup or handoff file',

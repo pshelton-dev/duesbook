@@ -64,7 +64,9 @@ const api: DuesbookApi = {
   restoreBackup: (path: string) => ipcRenderer.invoke('backup:restore', path),
   exportHandoff: () => ipcRenderer.invoke('handoff:export'),
   setUpdateCheck: (enabled: boolean) => ipcRenderer.invoke('app:set-update-check', enabled),
-  chooseAndRestoreBackup: () => ipcRenderer.invoke('backup:choose-and-restore')
+  chooseAndRestoreBackup: () => ipcRenderer.invoke('backup:choose-and-restore'),
+  getHomeSummary: () => ipcRenderer.invoke('home:summary'),
+  checkForUpdate: () => ipcRenderer.invoke('update:check')
 }
 
 contextBridge.exposeInMainWorld('duesbook', api)

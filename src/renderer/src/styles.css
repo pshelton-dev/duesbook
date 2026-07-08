@@ -771,6 +771,51 @@ th .chip:first-child {
   margin-top: 24px;
 }
 
+.balance-cards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.balance-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 14px 20px;
+  min-width: 150px;
+}
+
+.balance-card.total {
+  background: #f4f9f4;
+  border-color: #b8d4b8;
+}
+
+.dues-progress {
+  max-width: 640px;
+}
+
+.dues-progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 4px;
+  background: #eee;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #3b6d3b;
+  border-radius: 4px;
+}
+
 .settings .panel {
   max-width: 640px;
 }
