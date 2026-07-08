@@ -2,8 +2,8 @@ import type Database from 'better-sqlite3'
 import { app, net } from 'electron'
 import type { UpdateInfo } from '../shared/types'
 
-/** Set to the real repo when it goes public; until then the check 404s silently. */
-const REPO = 'CHANGE-ME/duesbook'
+/** While the repo is private the unauthenticated check 404s silently; it goes live when the repo does. */
+const REPO = 'pshelton-dev/duesbook'
 
 function isNewer(candidate: string, current: string): boolean {
   const a = candidate.split('.').map(Number)
