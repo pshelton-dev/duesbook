@@ -1,0 +1,15 @@
+appId: com.duesbook.app
+productName: Duesbook
+directories:
+  buildResources: build
+files:
+  - out/**
+  - resources/**
+mac:
+  category: public.app-category.finance
+  target:
+    - dmg
+win:
+  target:
+    - nsis
+npmRebuild: true
