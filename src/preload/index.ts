@@ -52,7 +52,19 @@ const api: DuesbookApi = {
   getTreasurerReport: (dateFrom: string, dateTo: string) =>
     ipcRenderer.invoke('reports:treasurer', dateFrom, dateTo),
   saveCsv: (defaultName: string, content: string) =>
-    ipcRenderer.invoke('file:save-csv', defaultName, content)
+    ipcRenderer.invoke('file:save-csv', defaultName, content),
+  updateOrganization: (name: string, fiscalYearStartMonth: number) =>
+    ipcRenderer.invoke('org:update', name, fiscalYearStartMonth),
+  updateCategory: (id: number, changes: { name?: string; isActive?: boolean }) =>
+    ipcRenderer.invoke('categories:update', id, changes),
+  setBackupConfig: (backupDir: string | null, retention: number) =>
+    ipcRenderer.invoke('backup:set-config', backupDir, retention),
+  backupNow: () => ipcRenderer.invoke('backup:now'),
+  listBackups: () => ipcRenderer.invoke('backup:list'),
+  restoreBackup: (path: string) => ipcRenderer.invoke('backup:restore', path),
+  exportHandoff: () => ipcRenderer.invoke('handoff:export'),
+  setUpdateCheck: (enabled: boolean) => ipcRenderer.invoke('app:set-update-check', enabled),
+  chooseAndRestoreBackup: () => ipcRenderer.invoke('backup:choose-and-restore')
 }
 
 contextBridge.exposeInMainWorld('duesbook', api)

@@ -2,6 +2,8 @@ export interface OrganizationSummary {
   name: string
   fiscalYearStartMonth: number
   backupDir: string | null
+  backupRetention: number
+  updateCheckEnabled: boolean
 }
 
 export interface AppStatus {
@@ -10,6 +12,14 @@ export interface AppStatus {
   schemaVersion: number
   /** null means no organization row yet — i.e. first run, wizard required */
   organization: OrganizationSummary | null
+  lastBackupAt: string | null
+}
+
+export interface BackupFile {
+  path: string
+  name: string
+  sizeBytes: number
+  modifiedAt: string
 }
 
 export type AccountType = 'checking' | 'savings' | 'cash' | 'other'
@@ -277,4 +287,16 @@ export interface DuesbookApi {
   getTreasurerReport: (dateFrom: string, dateTo: string) => Promise<TreasurerReport>
   /** opens a save dialog; returns the saved path or null if cancelled */
   saveCsv: (defaultName: string, content: string) => Promise<string | null>
+  updateOrganization: (name: string, fiscalYearStartMonth: number) => Promise<void>
+  updateCategory: (id: number, changes: { name?: string; isActive?: boolean }) => Promise<void>
+  setBackupConfig: (backupDir: string | null, retention: number) => Promise<void>
+  /** returns the path of the backup written */
+  backupNow: () => Promise<string>
+  listBackups: () => Promise<BackupFile[]>
+  restoreBackup: (path: string) => Promise<void>
+  /** returns the folder exported into, or null if cancelled */
+  exportHandoff: () => Promise<string | null>
+  setUpdateCheck: (enabled: boolean) => Promise<void>
+  /** file picker + restore in one step (used on the wizard's welcome step); false if cancelled */
+  chooseAndRestoreBackup: () => Promise<boolean>
 }

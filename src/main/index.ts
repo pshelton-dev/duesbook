@@ -1,5 +1,6 @@
 import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
+import { maybeAutoBackup } from './backup'
 import { openDb, closeDb } from './db'
 import { registerIpc } from './ipc'
 
@@ -33,9 +34,13 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  openDb()
+  const db = openDb()
   registerIpc()
   createWindow()
+
+  maybeAutoBackup(db).catch((err) => {
+    console.error('Automatic backup failed:', err)
+  })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

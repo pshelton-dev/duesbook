@@ -767,6 +767,27 @@ th .chip:first-child {
   text-align: right;
 }
 
+.settings h2 {
+  margin-top: 24px;
+}
+
+.settings .panel {
+  max-width: 640px;
+}
+
+.field-static {
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.inactive-row td {
+  color: #999;
+}
+
+.restore-list {
+  margin-top: 12px;
+}
+
 @media print {
   body * {
     visibility: hidden;

@@ -138,6 +138,17 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
                 Many organizations run July to June; if yours follows the calendar year, leave
                 this on January. You can change it later in Settings.
               </p>
+              <p style={{ marginTop: 24 }}>
+                <button
+                  className="btn small"
+                  onClick={async () => {
+                    const ok = await window.duesbook.chooseAndRestoreBackup()
+                    if (ok) onDone()
+                  }}
+                >
+                  Taking over from a previous treasurer? Restore their file…
+                </button>
+              </p>
             </>
           )}
 

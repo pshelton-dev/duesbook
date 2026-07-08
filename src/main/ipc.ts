@@ -12,11 +12,13 @@ import type {
   WizardPayload
 } from '../shared/types'
 import { writeFileSync } from 'fs'
+import * as backup from './backup'
 import { getDbPath, getSchemaVersion, openDb } from './db'
 import * as dues from './dues'
 import * as ledger from './ledger'
 import * as members from './members'
 import { treasurerReport } from './reports'
+import * as settings from './settings'
 import { completeWizard } from './wizard'
 
 export function registerIpc(): void {
@@ -26,17 +28,28 @@ export function registerIpc(): void {
       .prepare(
         `SELECT name,
                 fiscal_year_start_month AS fiscalYearStartMonth,
-                backup_dir AS backupDir
+                backup_dir AS backupDir,
+                backup_retention AS backupRetention,
+                update_check_enabled AS updateCheckEnabled
          FROM organization WHERE id = 1`
       )
       .get() as
-      | { name: string; fiscalYearStartMonth: number; backupDir: string | null }
+      | {
+          name: string
+          fiscalYearStartMonth: number
+          backupDir: string | null
+          backupRetention: number
+          updateCheckEnabled: number
+        }
       | undefined
     return {
       appVersion: app.getVersion(),
       dbPath: getDbPath(),
       schemaVersion: getSchemaVersion(db),
-      organization: org ?? null
+      organization: org
+        ? { ...org, updateCheckEnabled: org.updateCheckEnabled === 1 }
+        : null,
+      lastBackupAt: backup.getLastBackupAt(db)
     }
   })
 
@@ -114,4 +127,42 @@ export function registerIpc(): void {
       return result.filePath
     }
   )
+
+  ipcMain.handle('org:update', (_e, name: string, fiscalYearStartMonth: number) =>
+    settings.updateOrganization(openDb(), name, fiscalYearStartMonth)
+  )
+  ipcMain.handle(
+    'categories:update',
+    (_e, id: number, changes: { name?: string; isActive?: boolean }) =>
+      settings.updateCategory(openDb(), id, changes)
+  )
+  ipcMain.handle('backup:set-config', (_e, backupDir: string | null, retention: number) =>
+    settings.setBackupConfig(openDb(), backupDir, retention)
+  )
+  ipcMain.handle('backup:now', () => backup.backupNow(openDb()))
+  ipcMain.handle('backup:list', () => backup.listBackups(openDb()))
+  ipcMain.handle('backup:restore', (_e, path: string) => backup.restoreBackup(path))
+  ipcMain.handle('handoff:export', async (): Promise<string | null> => {
+    const result = await dialog.showOpenDialog({
+      title: 'Export for new treasurer',
+      message: 'Choose where to put the handoff files (a USB drive works well).',
+      properties: ['openDirectory', 'createDirectory']
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    await backup.exportHandoff(openDb(), result.filePaths[0])
+    return result.filePaths[0]
+  })
+  ipcMain.handle('app:set-update-check', (_e, enabled: boolean) =>
+    settings.setUpdateCheck(openDb(), enabled)
+  )
+  ipcMain.handle('backup:choose-and-restore', async (): Promise<boolean> => {
+    const result = await dialog.showOpenDialog({
+      title: 'Restore from a backup or handoff file',
+      filters: [{ name: 'Duesbook books', extensions: ['db'] }],
+      properties: ['openFile']
+    })
+    if (result.canceled || result.filePaths.length === 0) return false
+    backup.restoreBackup(result.filePaths[0])
+    return true
+  })
 }
