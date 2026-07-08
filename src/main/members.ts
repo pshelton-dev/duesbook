@@ -10,7 +10,7 @@ import type {
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
-interface PeriodRow {
+export interface PeriodRow {
   id: number
   label: string
   start_date: string
@@ -18,7 +18,7 @@ interface PeriodRow {
   amount_cents: number
 }
 
-interface MemberDbRow {
+export interface MemberDbRow {
   id: number
   first_name: string
   last_name: string
@@ -54,14 +54,14 @@ export function currentPeriod(db: Database.Database): PeriodRow | null {
   return latest ?? null
 }
 
-function membershipOverlaps(m: MemberDbRow, p: PeriodRow): boolean {
+export function membershipOverlaps(m: MemberDbRow, p: PeriodRow): boolean {
   if (m.join_date && m.join_date > p.end_date) return false
   if (m.left_date && m.left_date < p.start_date) return false
   return true
 }
 
 /** owed = COALESCE(override, exempt ? 0 : period amount) − payments (see DATA-MODEL.md) */
-function duesFor(
+export function duesFor(
   m: MemberDbRow,
   p: PeriodRow | null,
   override: number | null,

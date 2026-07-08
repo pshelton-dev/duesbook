@@ -2,8 +2,10 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type {
   CategoryKind,
   DuesbookApi,
+  DuesPeriodInput,
   MemberInput,
   NewTxn,
+  RecordDuesPayment,
   TxnFilters,
   TxnUpdate,
   WizardMember,
@@ -31,7 +33,22 @@ const api: DuesbookApi = {
     ipcRenderer.invoke('members:update', id, member),
   deleteMember: (id: number) => ipcRenderer.invoke('members:delete', id),
   importMembers: (list: WizardMember[]) => ipcRenderer.invoke('members:import', list),
-  getMemberDetail: (id: number) => ipcRenderer.invoke('members:detail', id)
+  getMemberDetail: (id: number) => ipcRenderer.invoke('members:detail', id),
+  listDuesPeriods: () => ipcRenderer.invoke('dues:list-periods'),
+  createDuesPeriod: (input: DuesPeriodInput) => ipcRenderer.invoke('dues:create-period', input),
+  updateDuesPeriod: (id: number, input: DuesPeriodInput) =>
+    ipcRenderer.invoke('dues:update-period', id, input),
+  suggestNextDuesPeriod: () => ipcRenderer.invoke('dues:suggest-next-period'),
+  getDuesRoster: (periodId: number) => ipcRenderer.invoke('dues:roster', periodId),
+  recordDuesPayment: (payment: RecordDuesPayment) =>
+    ipcRenderer.invoke('dues:record-payment', payment),
+  listUnallocatedDuesDeposits: () => ipcRenderer.invoke('dues:unallocated'),
+  setDuesOverride: (
+    memberId: number,
+    periodId: number,
+    amountCents: number | null,
+    note: string | null
+  ) => ipcRenderer.invoke('dues:set-override', memberId, periodId, amountCents, note)
 }
 
 contextBridge.exposeInMainWorld('duesbook', api)

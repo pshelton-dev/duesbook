@@ -165,6 +165,72 @@ export interface MemberDetail extends MemberInput {
   history: MemberPeriodHistory[]
 }
 
+export interface DuesPeriodRow {
+  id: number
+  label: string
+  startDate: string
+  endDate: string
+  amountCents: number
+  isCurrent: boolean
+}
+
+export interface DuesPeriodInput {
+  label: string
+  startDate: string
+  endDate: string
+  amountCents: number
+}
+
+export interface DuesRosterRow {
+  memberId: number
+  firstName: string
+  lastName: string
+  duesExempt: boolean
+  overrideCents: number | null
+  overrideNote: string | null
+  /** what this member is expected to pay for the period (after override/exemption) */
+  baseCents: number
+  paidCents: number
+  outstandingCents: number
+  status: DuesStatus
+}
+
+export interface DuesRoster {
+  rows: DuesRosterRow[]
+  summary: {
+    collectedCents: number
+    outstandingCents: number
+    paidCount: number
+    expectedCount: number
+  }
+}
+
+export interface UnallocatedDeposit {
+  txnId: number
+  date: string
+  amountCents: number
+  allocatedCents: number
+  payee: string | null
+  accountName: string
+}
+
+export interface DuesAllocation {
+  memberId: number
+  amountCents: number
+}
+
+export interface RecordDuesPayment {
+  periodId: number
+  allocations: DuesAllocation[]
+  /** allocate against this existing deposit; null = create a new ledger transaction */
+  txnId: number | null
+  /** required when txnId is null */
+  accountId: number | null
+  date: string | null
+  /** check number / note — becomes the transaction memo */
+  memo: string | null
+}
+
 export interface DuesbookApi {
   getStatus: () => Promise<AppStatus>
   chooseBackupDir: () => Promise<string | null>
@@ -183,4 +249,17 @@ export interface DuesbookApi {
   deleteMember: (id: number) => Promise<void>
   importMembers: (members: WizardMember[]) => Promise<number>
   getMemberDetail: (id: number) => Promise<MemberDetail>
+  listDuesPeriods: () => Promise<DuesPeriodRow[]>
+  createDuesPeriod: (input: DuesPeriodInput) => Promise<number>
+  updateDuesPeriod: (id: number, input: DuesPeriodInput) => Promise<void>
+  suggestNextDuesPeriod: () => Promise<DuesPeriodInput | null>
+  getDuesRoster: (periodId: number) => Promise<DuesRoster>
+  recordDuesPayment: (payment: RecordDuesPayment) => Promise<void>
+  listUnallocatedDuesDeposits: () => Promise<UnallocatedDeposit[]>
+  setDuesOverride: (
+    memberId: number,
+    periodId: number,
+    amountCents: number | null,
+    note: string | null
+  ) => Promise<void>
 }

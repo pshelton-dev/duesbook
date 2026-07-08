@@ -2,14 +2,17 @@ import { app, dialog, ipcMain } from 'electron'
 import type {
   AppStatus,
   CategoryKind,
+  DuesPeriodInput,
   MemberInput,
   NewTxn,
+  RecordDuesPayment,
   TxnFilters,
   TxnUpdate,
   WizardMember,
   WizardPayload
 } from '../shared/types'
 import { getDbPath, getSchemaVersion, openDb } from './db'
+import * as dues from './dues'
 import * as ledger from './ledger'
 import * as members from './members'
 import { completeWizard } from './wizard'
@@ -73,4 +76,23 @@ export function registerIpc(): void {
     members.importMembers(openDb(), list)
   )
   ipcMain.handle('members:detail', (_e, id: number) => members.getMemberDetail(openDb(), id))
+
+  ipcMain.handle('dues:list-periods', () => dues.listPeriods(openDb()))
+  ipcMain.handle('dues:create-period', (_e, input: DuesPeriodInput) =>
+    dues.createPeriod(openDb(), input)
+  )
+  ipcMain.handle('dues:update-period', (_e, id: number, input: DuesPeriodInput) =>
+    dues.updatePeriod(openDb(), id, input)
+  )
+  ipcMain.handle('dues:suggest-next-period', () => dues.suggestNextPeriod(openDb()))
+  ipcMain.handle('dues:roster', (_e, periodId: number) => dues.getRoster(openDb(), periodId))
+  ipcMain.handle('dues:record-payment', (_e, payment: RecordDuesPayment) =>
+    dues.recordPayment(openDb(), payment)
+  )
+  ipcMain.handle('dues:unallocated', () => dues.listUnallocated(openDb()))
+  ipcMain.handle(
+    'dues:set-override',
+    (_e, memberId: number, periodId: number, amountCents: number | null, note: string | null) =>
+      dues.setOverride(openDb(), memberId, periodId, amountCents, note)
+  )
 }
