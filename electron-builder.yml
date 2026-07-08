@@ -7,9 +7,15 @@ files:
   - resources/**
 mac:
   category: public.app-category.finance
+  icon: build/icon.png
   target:
     - dmg
 win:
+  icon: build/icon.png
+  artifactName: ${productName}-Setup-${version}-${arch}.${ext}
   target:
     - nsis
+nsis:
+  oneClick: true
+  deleteAppDataOnUninstall: false
 npmRebuild: true
