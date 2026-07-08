@@ -2,9 +2,11 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type {
   CategoryKind,
   DuesbookApi,
+  MemberInput,
   NewTxn,
   TxnFilters,
   TxnUpdate,
+  WizardMember,
   WizardPayload
 } from '../shared/types'
 
@@ -22,7 +24,14 @@ const api: DuesbookApi = {
   updateTxn: (txn: TxnUpdate) => ipcRenderer.invoke('txn:update', txn),
   deleteTxn: (id: number) => ipcRenderer.invoke('txn:delete', id),
   setTxnCleared: (id: number, cleared: boolean) =>
-    ipcRenderer.invoke('txn:set-cleared', id, cleared)
+    ipcRenderer.invoke('txn:set-cleared', id, cleared),
+  listMembers: () => ipcRenderer.invoke('members:list'),
+  createMember: (member: MemberInput) => ipcRenderer.invoke('members:create', member),
+  updateMember: (id: number, member: MemberInput) =>
+    ipcRenderer.invoke('members:update', id, member),
+  deleteMember: (id: number) => ipcRenderer.invoke('members:delete', id),
+  importMembers: (list: WizardMember[]) => ipcRenderer.invoke('members:import', list),
+  getMemberDetail: (id: number) => ipcRenderer.invoke('members:detail', id)
 }
 
 contextBridge.exposeInMainWorld('duesbook', api)

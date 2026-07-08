@@ -2,13 +2,16 @@ import { app, dialog, ipcMain } from 'electron'
 import type {
   AppStatus,
   CategoryKind,
+  MemberInput,
   NewTxn,
   TxnFilters,
   TxnUpdate,
+  WizardMember,
   WizardPayload
 } from '../shared/types'
 import { getDbPath, getSchemaVersion, openDb } from './db'
 import * as ledger from './ledger'
+import * as members from './members'
 import { completeWizard } from './wizard'
 
 export function registerIpc(): void {
@@ -59,4 +62,15 @@ export function registerIpc(): void {
   ipcMain.handle('txn:set-cleared', (_e, id: number, cleared: boolean) =>
     ledger.setTxnCleared(openDb(), id, cleared)
   )
+
+  ipcMain.handle('members:list', () => members.listMembers(openDb()))
+  ipcMain.handle('members:create', (_e, m: MemberInput) => members.createMember(openDb(), m))
+  ipcMain.handle('members:update', (_e, id: number, m: MemberInput) =>
+    members.updateMember(openDb(), id, m)
+  )
+  ipcMain.handle('members:delete', (_e, id: number) => members.deleteMember(openDb(), id))
+  ipcMain.handle('members:import', (_e, list: WizardMember[]) =>
+    members.importMembers(openDb(), list)
+  )
+  ipcMain.handle('members:detail', (_e, id: number) => members.getMemberDetail(openDb(), id))
 }

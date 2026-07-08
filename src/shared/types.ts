@@ -117,6 +117,54 @@ export interface TxnUpdate {
   cleared: boolean
 }
 
+export type DuesStatus = 'paid' | 'partial' | 'owed' | 'waived' | 'exempt' | 'na'
+
+export interface MemberRow {
+  id: number
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  joinDate: string | null
+  leftDate: string | null
+  duesExempt: boolean
+  duesStatus: DuesStatus
+  owedCents: number
+  paidCents: number
+}
+
+export interface MemberInput {
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  address: string | null
+  joinDate: string | null
+  leftDate: string | null
+  duesExempt: boolean
+  notes: string | null
+}
+
+export interface MemberPayment {
+  date: string
+  amountCents: number
+  txnId: number
+  accountName: string
+}
+
+export interface MemberPeriodHistory {
+  periodLabel: string
+  owedCents: number
+  paidCents: number
+  status: DuesStatus
+  payments: MemberPayment[]
+}
+
+export interface MemberDetail extends MemberInput {
+  id: number
+  history: MemberPeriodHistory[]
+}
+
 export interface DuesbookApi {
   getStatus: () => Promise<AppStatus>
   chooseBackupDir: () => Promise<string | null>
@@ -129,4 +177,10 @@ export interface DuesbookApi {
   updateTxn: (txn: TxnUpdate) => Promise<void>
   deleteTxn: (id: number) => Promise<void>
   setTxnCleared: (id: number, cleared: boolean) => Promise<void>
+  listMembers: () => Promise<MemberRow[]>
+  createMember: (member: MemberInput) => Promise<void>
+  updateMember: (id: number, member: MemberInput) => Promise<void>
+  deleteMember: (id: number) => Promise<void>
+  importMembers: (members: WizardMember[]) => Promise<number>
+  getMemberDetail: (id: number) => Promise<MemberDetail>
 }

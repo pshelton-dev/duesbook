@@ -525,3 +525,65 @@ code {
   color: #fff;
   font-weight: 600;
 }
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+td .chip:first-child,
+th .chip:first-child {
+  margin-left: 0;
+}
+
+.chip-paid {
+  background: #dce8dc;
+  color: #2f572f;
+}
+
+.chip-partial {
+  background: #fdf6ec;
+  color: #8a6420;
+  border: 1px solid #e0c48c;
+}
+
+.chip-owed {
+  background: #fbeeee;
+  color: #a32d2d;
+}
+
+.chip-waived,
+.chip-exempt {
+  background: #eef0f4;
+  color: #4a5568;
+}
+
+.chip-na {
+  background: #f1f1ef;
+  color: #999;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.detail-header h1 {
+  margin-bottom: 0;
+}
+
+.drawer.wide {
+  width: 520px;
+}
