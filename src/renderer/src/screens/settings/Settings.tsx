@@ -18,6 +18,7 @@ export default function Settings({
   const [name, setName] = useState(org.name)
   const [fyMonth, setFyMonth] = useState(org.fiscalYearStartMonth)
   const [retention, setRetention] = useState(String(org.backupRetention))
+  const [arrears, setArrears] = useState(String(org.arrearsThreshold))
   const [categories, setCategories] = useState<CategorySummary[]>([])
   const [editingCat, setEditingCat] = useState<{ id: number; name: string } | null>(null)
   const [backups, setBackups] = useState<BackupFile[] | null>(null)
@@ -274,6 +275,30 @@ export default function Settings({
             </button>
           </div>
         )}
+      </div>
+
+      <h2>Dues</h2>
+      <div className="panel">
+        <label className="field">
+          Flag members behind on dues by this many months (periods)
+          <input
+            value={arrears}
+            inputMode="numeric"
+            onChange={(e) => setArrears(e.target.value)}
+            onBlur={() => {
+              const n = Number(arrears)
+              if (Number.isInteger(n) && n >= 1 && n !== org.arrearsThreshold) {
+                run(async () => {
+                  await window.duesbook.setArrearsThreshold(n)
+                  onChanged()
+                }, 'Arrears threshold updated.')
+              }
+            }}
+          />
+        </label>
+        <p className="hint">
+          Members owing for this many started periods appear in a warning on the Home screen.
+        </p>
       </div>
 
       <h2>Treasurer handoff</h2>

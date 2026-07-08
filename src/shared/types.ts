@@ -4,6 +4,8 @@ export interface OrganizationSummary {
   backupDir: string | null
   backupRetention: number
   updateCheckEnabled: boolean
+  /** flag members with outstanding dues in this many periods (usually months) */
+  arrearsThreshold: number
 }
 
 export interface AppStatus {
@@ -139,8 +141,12 @@ export interface MemberRow {
   leftDate: string | null
   duesExempt: boolean
   duesStatus: DuesStatus
+  /** total outstanding across ALL started periods, not just the current one */
   owedCents: number
+  /** total paid across all periods */
   paidCents: number
+  /** count of started periods with an outstanding balance */
+  periodsBehind: number
 }
 
 export interface MemberInput {
@@ -271,6 +277,16 @@ export interface HomeSummary {
     amountCents: number
   }[]
   unallocatedCount: number
+  arrears: {
+    threshold: number
+    members: {
+      memberId: number
+      firstName: string
+      lastName: string
+      periodsBehind: number
+      owedCents: number
+    }[]
+  }
 }
 
 export interface UpdateInfo {
@@ -327,4 +343,5 @@ export interface DuesbookApi {
   getHomeSummary: () => Promise<HomeSummary>
   /** null = up to date, disabled, or offline (never an error) */
   checkForUpdate: () => Promise<UpdateInfo | null>
+  setArrearsThreshold: (periods: number) => Promise<void>
 }

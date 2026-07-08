@@ -120,5 +120,9 @@ export const migrations: string[] = [
     ('Fees',          'expense', 5),
     ('Postage',       'expense', 6),
     ('Other expense', 'expense', 9);
+  `,
+  // 003 — arrears notification threshold (in dues periods, usually months)
+  `
+  ALTER TABLE organization ADD COLUMN arrears_threshold INTEGER NOT NULL DEFAULT 2;
   `
 ]

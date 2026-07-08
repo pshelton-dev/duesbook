@@ -8,6 +8,7 @@ import type {
   UnallocatedDeposit
 } from '../shared/types'
 import {
+  computeDuesTotals,
   currentPeriod,
   duesFor,
   membershipOverlaps,
@@ -64,26 +65,144 @@ export function updatePeriod(db: Database.Database, id: number, input: DuesPerio
   if (result.changes === 0) throw new Error('That period no longer exists.')
 }
 
-/** Prefill for "create next period": the year after the latest one. */
-export function suggestNextPeriod(db: Database.Database): DuesPeriodInput | null {
-  const latest = db
-    .prepare(`SELECT * FROM dues_period ORDER BY start_date DESC LIMIT 1`)
-    .get() as PeriodRow | undefined
-  if (!latest) return null
-  const [y, m, d] = latest.start_date.split('-').map(Number)
-  const start = `${y + 1}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-  const endExclusive = new Date(y + 2, m - 1, d)
-  const endInclusive = new Date(endExclusive.getTime() - 24 * 60 * 60 * 1000)
-  const end = `${endInclusive.getFullYear()}-${String(endInclusive.getMonth() + 1).padStart(2, '0')}-${String(endInclusive.getDate()).padStart(2, '0')}`
-  const label = /^\d{4}$/.test(latest.label)
-    ? String(Number(latest.label) + 1)
-    : latest.label.replace(/\d{4}(–|-)\d{4}/, `${y + 1}$1${y + 2}`)
+const MONTHS_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+]
+
+function isoDate(y: number, m: number, d: number): string {
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+}
+
+function lastDayOfMonth(y: number, m: number): number {
+  return new Date(y, m, 0).getDate()
+}
+
+function addDays(iso: string, days: number): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  const date = new Date(y, m - 1, d + days)
+  return isoDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
+}
+
+function todayLocalIso(): string {
+  const d = new Date()
+  return isoDate(d.getFullYear(), d.getMonth() + 1, d.getDate())
+}
+
+/**
+ * The period after `latest`, matching its cadence: a June period is followed
+ * by July, a 2026 fiscal year by 2027, an odd custom range by an equally
+ * long one. Labels follow suit ("Jul 2026", "2027", "2027–2028").
+ */
+export function nextPeriodFrom(latest: PeriodRow): DuesPeriodInput {
+  const [sy, sm, sd] = latest.start_date.split('-').map(Number)
+  const [ey, em, ed] = latest.end_date.split('-').map(Number)
+  const startDate = addDays(latest.end_date, 1)
+  const [ny, nm] = startDate.split('-').map(Number)
+
+  const monthAligned = sd === 1 && ed === lastDayOfMonth(ey, em)
+  if (monthAligned) {
+    const spanMonths = (ey - sy) * 12 + (em - sm) + 1
+    const endMonthIndex = nm + spanMonths - 1
+    const endY = ny + Math.floor((endMonthIndex - 1) / 12)
+    const endM = ((endMonthIndex - 1) % 12) + 1
+    const endDate = isoDate(endY, endM, lastDayOfMonth(endY, endM))
+    const label =
+      spanMonths === 1
+        ? `${MONTHS_SHORT[nm - 1]} ${ny}`
+        : spanMonths === 12
+          ? nm === 1
+            ? `${ny}`
+            : `${ny}–${ny + 1}`
+          : `${startDate} to ${endDate}`
+    return { label, startDate, endDate, amountCents: latest.amount_cents }
+  }
+
+  const spanDays = Math.round(
+    (new Date(ey, em - 1, ed).getTime() - new Date(sy, sm - 1, sd).getTime()) /
+      (24 * 60 * 60 * 1000)
+  )
+  const endDate = addDays(startDate, spanDays)
   return {
-    label: label === latest.label ? `${latest.label} +1` : label,
-    startDate: start,
-    endDate: end,
+    label: `${startDate} to ${endDate}`,
+    startDate,
+    endDate,
     amountCents: latest.amount_cents
   }
+}
+
+function latestPeriod(db: Database.Database): PeriodRow | undefined {
+  return db.prepare(`SELECT * FROM dues_period ORDER BY start_date DESC LIMIT 1`).get() as
+    | PeriodRow
+    | undefined
+}
+
+/** Prefill for the "create next period" drawer. */
+export function suggestNextPeriod(db: Database.Database): DuesPeriodInput | null {
+  const latest = latestPeriod(db)
+  return latest ? nextPeriodFrom(latest) : null
+}
+
+/**
+ * Auto-rolls dues periods forward so a monthly org never has to create
+ * "August" by hand: whenever the latest period has fully ended, the next one
+ * (same length, same amount) is created, up to the period containing today.
+ * Runs at every launch; a no-op when periods are current or none exist yet.
+ */
+export function ensurePeriodsCurrent(db: Database.Database): number {
+  const today = todayLocalIso()
+  let created = 0
+  for (let i = 0; i < 120; i++) {
+    const latest = latestPeriod(db)
+    if (!latest || latest.end_date >= today) break
+    createPeriod(db, nextPeriodFrom(latest))
+    created++
+  }
+  return created
+}
+
+export interface ArrearsMember {
+  memberId: number
+  firstName: string
+  lastName: string
+  periodsBehind: number
+  owedCents: number
+}
+
+/**
+ * Members with outstanding dues in `threshold`-or-more periods that have
+ * already started (the current month counts). Exemptions, waivers, and
+ * overrides are respected via the standard dues formula.
+ */
+export function getArrears(
+  db: Database.Database
+): { threshold: number; members: ArrearsMember[] } {
+  const org = db
+    .prepare(`SELECT arrears_threshold AS threshold FROM organization WHERE id = 1`)
+    .get() as { threshold: number } | undefined
+  const threshold = org?.threshold ?? 2
+
+  const totals = computeDuesTotals(db)
+  const names = db
+    .prepare(`SELECT id, first_name, last_name FROM member`)
+    .all() as { id: number; first_name: string; last_name: string }[]
+
+  const members: ArrearsMember[] = []
+  for (const n of names) {
+    const t = totals.get(n.id)
+    if (!t || t.periodsBehind < threshold) continue
+    members.push({
+      memberId: n.id,
+      firstName: n.first_name,
+      lastName: n.last_name,
+      periodsBehind: t.periodsBehind,
+      owedCents: t.outstandingCents
+    })
+  }
+  members.sort(
+    (a, b) => b.periodsBehind - a.periodsBehind || a.lastName.localeCompare(b.lastName)
+  )
+  return { threshold, members }
 }
 
 export function getRoster(db: Database.Database, periodId: number): DuesRoster {

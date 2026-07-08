@@ -196,6 +196,16 @@ as income or spending.
    the escape hatch for the exceptions every real org has (prorated
    mid-year joiners, waivers) without building a tiers system.
 
+## Post-draft changes
+
+- Migration 002: starter income/expense categories.
+- Migration 003: `organization.arrears_threshold` (default 2) — members with
+  outstanding dues in that many *started* periods are flagged on Home.
+- Dues cadence correction (2026-07-08): target orgs bill **monthly**. No
+  schema change needed — `dues_period` was always an arbitrary date range —
+  but period generation is cadence-aware (next period copies the length and
+  amount of the last one) and auto-rolls forward at launch.
+
 ## Resolved questions (2026-07-08)
 
 - Member record fields: baseline set — name, email, phone, address, join

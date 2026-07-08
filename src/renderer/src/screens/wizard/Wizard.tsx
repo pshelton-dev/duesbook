@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { WizardAccount, WizardMember, WizardPayload } from '../../../../shared/types'
-import { currentFiscalPeriod, MONTH_NAMES } from '../../lib/fiscal'
+import { currentFiscalPeriod, currentMonthPeriod, MONTH_NAMES } from '../../lib/fiscal'
 import { parseDollarsToCents } from '../../lib/money'
 import StepAccounts from './StepAccounts'
 import StepMembers from './StepMembers'
@@ -17,6 +17,7 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
   const [accounts, setAccounts] = useState<WizardAccount[]>([])
   const [backupDir, setBackupDir] = useState<string | null>(null)
   const [duesEnabled, setDuesEnabled] = useState(true)
+  const [duesCadence, setDuesCadence] = useState<'monthly' | 'yearly'>('monthly')
   const [duesInitialized, setDuesInitialized] = useState(false)
   const [duesAmount, setDuesAmount] = useState('')
   const [duesLabel, setDuesLabel] = useState('')
@@ -37,6 +38,13 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
     return null
   }
 
+  function prefillDues(cadence: 'monthly' | 'yearly'): void {
+    const period = cadence === 'monthly' ? currentMonthPeriod() : currentFiscalPeriod(fyMonth)
+    setDuesLabel(period.label)
+    setDuesStart(period.startDate)
+    setDuesEnd(period.endDate)
+  }
+
   function next(): void {
     const problem = validateStep()
     if (problem) {
@@ -45,10 +53,7 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
     }
     setError(null)
     if (step === 2 && !duesInitialized) {
-      const period = currentFiscalPeriod(fyMonth)
-      setDuesLabel(period.label)
-      setDuesStart(period.startDate)
-      setDuesEnd(period.endDate)
+      prefillDues(duesCadence)
       setDuesInitialized(true)
     }
     setStep(step + 1)
@@ -193,11 +198,25 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
               {duesEnabled && (
                 <>
                   <label className="field">
-                    Dues amount per member
+                    Dues are billed
+                    <select
+                      value={duesCadence}
+                      onChange={(e) => {
+                        const cadence = e.target.value as 'monthly' | 'yearly'
+                        setDuesCadence(cadence)
+                        prefillDues(cadence)
+                      }}
+                    >
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Once per fiscal year</option>
+                    </select>
+                  </label>
+                  <label className="field">
+                    Dues amount per member {duesCadence === 'monthly' ? 'per month' : 'per year'}
                     <input
                       value={duesAmount}
                       onChange={(e) => setDuesAmount(e.target.value)}
-                      placeholder="e.g. 50"
+                      placeholder={duesCadence === 'monthly' ? 'e.g. 10' : 'e.g. 50'}
                       inputMode="decimal"
                     />
                   </label>
@@ -224,8 +243,8 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
                     </label>
                   </div>
                   <p className="hint">
-                    Prefilled from your fiscal year. Individual waivers and prorated amounts can
-                    be set per member later.
+                    Future periods are created automatically as months (or years) roll over.
+                    Individual waivers and prorated amounts can be set per member later.
                   </p>
                 </>
               )}

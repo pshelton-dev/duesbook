@@ -82,6 +82,26 @@ export default function Home({
           </button>
         </div>
       )}
+      {summary.arrears.members.length > 0 && (
+        <div className="panel error">
+          <strong>
+            {summary.arrears.members.length} member
+            {summary.arrears.members.length > 1 ? 's are' : ' is'} {summary.arrears.threshold}+
+            months behind on dues:
+          </strong>
+          <ul className="arrears-list">
+            {summary.arrears.members.map((m) => (
+              <li key={m.memberId}>
+                {m.firstName} {m.lastName} — {m.periodsBehind} months,{' '}
+                {formatCents(m.owedCents)} owed
+              </li>
+            ))}
+          </ul>
+          <button className="btn small" onClick={() => onNavigate('dues')}>
+            Open dues
+          </button>
+        </div>
+      )}
 
       <div className="balance-cards">
         {summary.accounts.map((a) => (

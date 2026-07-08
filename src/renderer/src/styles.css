@@ -816,6 +816,12 @@ th .chip:first-child {
   border-radius: 4px;
 }
 
+.arrears-list {
+  margin: 8px 0;
+  padding-left: 20px;
+  font-size: 13px;
+}
+
 .settings .panel {
   max-width: 640px;
 }

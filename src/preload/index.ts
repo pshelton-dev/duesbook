@@ -66,7 +66,9 @@ const api: DuesbookApi = {
   setUpdateCheck: (enabled: boolean) => ipcRenderer.invoke('app:set-update-check', enabled),
   chooseAndRestoreBackup: () => ipcRenderer.invoke('backup:choose-and-restore'),
   getHomeSummary: () => ipcRenderer.invoke('home:summary'),
-  checkForUpdate: () => ipcRenderer.invoke('update:check')
+  checkForUpdate: () => ipcRenderer.invoke('update:check'),
+  setArrearsThreshold: (periods: number) =>
+    ipcRenderer.invoke('org:set-arrears-threshold', periods)
 }
 
 contextBridge.exposeInMainWorld('duesbook', api)

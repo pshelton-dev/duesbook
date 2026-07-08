@@ -79,29 +79,86 @@ export function duesFor(
   return { status: 'owed', owedCents: owed, paidCents: paid }
 }
 
-export function listMembers(db: Database.Database): MemberRow[] {
-  const period = currentPeriod(db)
+export interface DuesTotals {
+  outstandingCents: number
+  paidCents: number
+  periodsBehind: number
+}
+
+/**
+ * Per-member dues position summed over every period that has started (the
+ * current one counts). Exemptions, waivers, and overrides go through the
+ * standard formula. Shared by the members roster and the arrears warning.
+ */
+export function computeDuesTotals(db: Database.Database): Map<number, DuesTotals> {
   const rows = db
     .prepare(
-      `SELECT m.*,
+      `SELECT m.*, p.id AS p_id, p.label AS p_label, p.start_date AS p_start,
+              p.end_date AS p_end, p.amount_cents AS p_amount,
               ov.amount_cents AS override_cents,
               COALESCE(pay.total, 0) AS paid_cents
        FROM member m
+       CROSS JOIN dues_period p
        LEFT JOIN dues_override ov
-         ON ov.member_id = m.id AND ov.dues_period_id = @periodId
+         ON ov.member_id = m.id AND ov.dues_period_id = p.id
        LEFT JOIN (
-         SELECT member_id, SUM(amount_cents) AS total
-         FROM dues_payment WHERE dues_period_id = @periodId GROUP BY member_id
-       ) pay ON pay.member_id = m.id
-       ORDER BY m.last_name COLLATE NOCASE, m.first_name COLLATE NOCASE`
+         SELECT member_id, dues_period_id, SUM(amount_cents) AS total
+         FROM dues_payment GROUP BY member_id, dues_period_id
+       ) pay ON pay.member_id = m.id AND pay.dues_period_id = p.id
+       WHERE p.start_date <= ?`
     )
-    .all({ periodId: period?.id ?? -1 }) as (MemberDbRow & {
+    .all(todayIso()) as (MemberDbRow & {
+    p_id: number
+    p_label: string
+    p_start: string
+    p_end: string
+    p_amount: number
     override_cents: number | null
     paid_cents: number
   })[]
 
+  const totals = new Map<number, DuesTotals>()
+  for (const r of rows) {
+    const period: PeriodRow = {
+      id: r.p_id,
+      label: r.p_label,
+      start_date: r.p_start,
+      end_date: r.p_end,
+      amount_cents: r.p_amount
+    }
+    const entry = totals.get(r.id) ?? { outstandingCents: 0, paidCents: 0, periodsBehind: 0 }
+    entry.paidCents += r.paid_cents
+    const result = duesFor(r, period, r.override_cents, r.paid_cents)
+    if (result.owedCents > 0) {
+      entry.outstandingCents += result.owedCents
+      entry.periodsBehind++
+    }
+    totals.set(r.id, entry)
+  }
+  return totals
+}
+
+export function listMembers(db: Database.Database): MemberRow[] {
+  const anyPeriodStarted =
+    db.prepare(`SELECT 1 FROM dues_period WHERE start_date <= ? LIMIT 1`).get(todayIso()) !==
+    undefined
+  const totals = computeDuesTotals(db)
+  const rows = db
+    .prepare(
+      `SELECT * FROM member
+       ORDER BY last_name COLLATE NOCASE, first_name COLLATE NOCASE`
+    )
+    .all() as MemberDbRow[]
+
   return rows.map((r) => {
-    const dues = duesFor(r, period, r.override_cents, r.paid_cents)
+    const t = totals.get(r.id) ?? { outstandingCents: 0, paidCents: 0, periodsBehind: 0 }
+    const status = !anyPeriodStarted
+      ? 'na'
+      : r.dues_exempt === 1 && t.outstandingCents === 0
+        ? 'exempt'
+        : t.outstandingCents > 0
+          ? 'owed'
+          : 'paid'
     return {
       id: r.id,
       firstName: r.first_name,
@@ -111,9 +168,10 @@ export function listMembers(db: Database.Database): MemberRow[] {
       joinDate: r.join_date,
       leftDate: r.left_date,
       duesExempt: r.dues_exempt === 1,
-      duesStatus: dues.status,
-      owedCents: dues.owedCents,
-      paidCents: dues.paidCents
+      duesStatus: status,
+      owedCents: t.outstandingCents,
+      paidCents: t.paidCents,
+      periodsBehind: t.periodsBehind
     }
   })
 }

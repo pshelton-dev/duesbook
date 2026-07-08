@@ -32,7 +32,8 @@ export function registerIpc(): void {
                 fiscal_year_start_month AS fiscalYearStartMonth,
                 backup_dir AS backupDir,
                 backup_retention AS backupRetention,
-                update_check_enabled AS updateCheckEnabled
+                update_check_enabled AS updateCheckEnabled,
+                arrears_threshold AS arrearsThreshold
          FROM organization WHERE id = 1`
       )
       .get() as
@@ -42,6 +43,7 @@ export function registerIpc(): void {
           backupDir: string | null
           backupRetention: number
           updateCheckEnabled: number
+          arrearsThreshold: number
         }
       | undefined
     return {
@@ -156,6 +158,9 @@ export function registerIpc(): void {
   })
   ipcMain.handle('app:set-update-check', (_e, enabled: boolean) =>
     settings.setUpdateCheck(openDb(), enabled)
+  )
+  ipcMain.handle('org:set-arrears-threshold', (_e, periods: number) =>
+    settings.setArrearsThreshold(openDb(), periods)
   )
   ipcMain.handle('home:summary', () => homeSummary(openDb()))
   ipcMain.handle('update:check', () => checkForUpdate(openDb()))

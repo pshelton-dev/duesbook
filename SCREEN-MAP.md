@@ -66,9 +66,10 @@ The checkbook register. Heart of day-to-day use.
 
 The roster.
 
-- **Table**: name · email · phone · joined · current-period dues status chip
-  (paid / partial / owed / waived / exempt) · active/former filter
-  (former = has `left_date`; shown only on demand).
+- **Table**: name · email · phone · joined · **total dues owed across all
+  started periods** with months-behind count (per-period detail lives in the
+  member's dues history) · active/former filter (former = has `left_date`;
+  shown only on demand).
 - **Add/edit** in a side panel — the baseline fields only (name, email, phone,
   address, join date, notes) plus the dues-exempt toggle and "mark as left".
 - **Member detail**: contact info + full dues history (every period: owed,

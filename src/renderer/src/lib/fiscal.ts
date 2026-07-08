@@ -42,6 +42,20 @@ export function fiscalPeriodShifted(
   }
 }
 
+/** The calendar month containing today, as a dues period: "Jul 2026". */
+export function currentMonthPeriod(today = new Date()): FiscalPeriod {
+  const y = today.getFullYear()
+  const m = today.getMonth() + 1
+  const lastDay = new Date(y, m, 0).getDate()
+  const mm = String(m).padStart(2, '0')
+  const short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return {
+    label: `${short[m - 1]} ${y}`,
+    startDate: `${y}-${mm}-01`,
+    endDate: `${y}-${mm}-${String(lastDay).padStart(2, '0')}`
+  }
+}
+
 /** First and last day of the calendar month `offset` months ago (0 = this month). */
 export function monthRange(offset: number, today = new Date()): { from: string; to: string } {
   const first = new Date(today.getFullYear(), today.getMonth() - offset, 1)

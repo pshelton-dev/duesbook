@@ -56,3 +56,10 @@ export function setBackupConfig(
 export function setUpdateCheck(db: Database.Database, enabled: boolean): void {
   db.prepare(`UPDATE organization SET update_check_enabled = ? WHERE id = 1`).run(enabled ? 1 : 0)
 }
+
+export function setArrearsThreshold(db: Database.Database, periods: number): void {
+  if (!Number.isInteger(periods) || periods < 1 || periods > 24) {
+    throw new Error('The arrears threshold must be between 1 and 24 periods.')
+  }
+  db.prepare(`UPDATE organization SET arrears_threshold = ? WHERE id = 1`).run(periods)
+}

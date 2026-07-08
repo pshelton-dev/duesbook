@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { maybeAutoBackup } from './backup'
 import { openDb, closeDb } from './db'
+import { ensurePeriodsCurrent } from './dues'
 import { registerIpc } from './ipc'
 
 function createWindow(): void {
@@ -36,6 +37,13 @@ function createWindow(): void {
 app.whenReady().then(() => {
   const db = openDb()
   registerIpc()
+
+  try {
+    ensurePeriodsCurrent(db)
+  } catch (err) {
+    console.error('Auto-rolling dues periods failed:', err)
+  }
+
   createWindow()
 
   maybeAutoBackup(db).catch((err) => {

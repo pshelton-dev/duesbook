@@ -29,8 +29,14 @@ treasurer turnover is normal, not exceptional.
 ### Scope (v1)
 - **Simple categorized ledger** — each account (checking, savings, cash box) is a
   register of dated transactions with income/expense categories. NOT double-entry.
-- **Dues: one configurable amount per period** (e.g. "$50/year"), same for every
-  member. Partial payments are tracked. (Tiers = possible v2; one added table.)
+- **Dues: one configurable amount per period**, same for every member. Partial
+  payments are tracked. (Tiers = possible v2; one added table.)
+- **Dues cadence: monthly or per-fiscal-year, chosen at setup** (2026-07-08
+  correction: target orgs bill monthly, e.g. "$10/month"; annual remains
+  supported). Periods auto-roll forward on launch — a monthly org never
+  creates "August" by hand.
+- **Arrears notification**: members with outstanding dues in N+ started
+  periods (default 2, configurable in Settings) are flagged on Home.
 - **Single organization per install.** (Multi-org later would just be "open a
   different file" — the one-file design keeps this cheap.)
 - **Single user, single machine.** Others receive exported reports, not app access.

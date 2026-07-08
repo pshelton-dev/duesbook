@@ -196,7 +196,7 @@ export default function Members(): React.JSX.Element {
               <th>Email</th>
               <th>Phone</th>
               <th>Joined</th>
-              <th>Dues</th>
+              <th>Dues owed (all months)</th>
             </tr>
           </thead>
           <tbody>
@@ -212,7 +212,12 @@ export default function Members(): React.JSX.Element {
                 <td>{m.phone}</td>
                 <td className="nowrap">{m.joinDate}</td>
                 <td>
-                  <StatusChip status={m.duesStatus} owedCents={m.owedCents} />
+                  <span className={`chip chip-${m.duesStatus}`}>
+                    {m.duesStatus === 'owed'
+                      ? `Owed · ${formatCents(m.owedCents)}` +
+                        (m.periodsBehind > 1 ? ` · ${m.periodsBehind} mo` : '')
+                      : STATUS_LABELS[m.duesStatus]}
+                  </span>
                 </td>
               </tr>
             ))}

@@ -44,6 +44,7 @@ export function homeSummary(db: Database.Database): HomeSummary {
     duesPeriodLabel: period?.label ?? null,
     dues: roster ? roster.summary : null,
     recent,
-    unallocatedCount: dues.listUnallocated(db).length
+    unallocatedCount: dues.listUnallocated(db).length,
+    arrears: dues.getArrears(db)
   }
 }
