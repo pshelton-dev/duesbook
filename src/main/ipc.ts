@@ -1,6 +1,14 @@
 import { app, dialog, ipcMain } from 'electron'
-import type { AppStatus, WizardPayload } from '../shared/types'
+import type {
+  AppStatus,
+  CategoryKind,
+  NewTxn,
+  TxnFilters,
+  TxnUpdate,
+  WizardPayload
+} from '../shared/types'
 import { getDbPath, getSchemaVersion, openDb } from './db'
+import * as ledger from './ledger'
 import { completeWizard } from './wizard'
 
 export function registerIpc(): void {
@@ -36,4 +44,19 @@ export function registerIpc(): void {
   ipcMain.handle('wizard:complete', (_event, payload: WizardPayload): void => {
     completeWizard(openDb(), payload)
   })
+
+  ipcMain.handle('accounts:list', () => ledger.listAccounts(openDb()))
+  ipcMain.handle('categories:list', () => ledger.listCategories(openDb()))
+  ipcMain.handle('categories:create', (_e, name: string, kind: CategoryKind) =>
+    ledger.createCategory(openDb(), name, kind)
+  )
+  ipcMain.handle('txn:list', (_e, accountId: number, filters: TxnFilters) =>
+    ledger.listTxns(openDb(), accountId, filters)
+  )
+  ipcMain.handle('txn:create', (_e, txn: NewTxn) => ledger.createTxn(openDb(), txn))
+  ipcMain.handle('txn:update', (_e, txn: TxnUpdate) => ledger.updateTxn(openDb(), txn))
+  ipcMain.handle('txn:delete', (_e, id: number) => ledger.deleteTxn(openDb(), id))
+  ipcMain.handle('txn:set-cleared', (_e, id: number, cleared: boolean) =>
+    ledger.setTxnCleared(openDb(), id, cleared)
+  )
 }

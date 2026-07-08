@@ -104,5 +104,21 @@ export const migrations: string[] = [
 
   INSERT INTO category (name, kind, is_system, sort_order)
   VALUES ('Dues', 'income', 1, 0);
+  `,
+  // 002 — starter categories so a fresh org can record transactions
+  // immediately; plain rows (is_system = 0), renamable/deactivatable.
+  `
+  INSERT INTO category (name, kind, sort_order) VALUES
+    ('Donations',     'income',  1),
+    ('Fundraising',   'income',  2),
+    ('Interest',      'income',  3),
+    ('Other income',  'income',  9),
+    ('Supplies',      'expense', 1),
+    ('Events',        'expense', 2),
+    ('Rent',          'expense', 3),
+    ('Insurance',     'expense', 4),
+    ('Fees',          'expense', 5),
+    ('Postage',       'expense', 6),
+    ('Other expense', 'expense', 9);
   `
 ]

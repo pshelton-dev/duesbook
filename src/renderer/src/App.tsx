@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { AppStatus } from '../../shared/types'
 import Home from './screens/Home'
+import Ledger from './screens/ledger/Ledger'
 import Placeholder from './screens/Placeholder'
 import Wizard from './screens/wizard/Wizard'
 
@@ -50,6 +51,8 @@ export default function App(): React.JSX.Element {
       <main className="content">
         {screen === 'home' ? (
           <Home status={status} />
+        ) : screen === 'ledger' ? (
+          <Ledger />
         ) : (
           <Placeholder name={SCREENS.find((s) => s.id === screen)!.label} />
         )}
