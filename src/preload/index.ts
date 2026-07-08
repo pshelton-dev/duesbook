@@ -48,7 +48,11 @@ const api: DuesbookApi = {
     periodId: number,
     amountCents: number | null,
     note: string | null
-  ) => ipcRenderer.invoke('dues:set-override', memberId, periodId, amountCents, note)
+  ) => ipcRenderer.invoke('dues:set-override', memberId, periodId, amountCents, note),
+  getTreasurerReport: (dateFrom: string, dateTo: string) =>
+    ipcRenderer.invoke('reports:treasurer', dateFrom, dateTo),
+  saveCsv: (defaultName: string, content: string) =>
+    ipcRenderer.invoke('file:save-csv', defaultName, content)
 }
 
 contextBridge.exposeInMainWorld('duesbook', api)

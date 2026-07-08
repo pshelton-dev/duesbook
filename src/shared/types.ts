@@ -231,6 +231,18 @@ export interface RecordDuesPayment {
   memo: string | null
 }
 
+export interface TreasurerReport {
+  dateFrom: string
+  dateTo: string
+  accounts: { name: string; openingCents: number; closingCents: number }[]
+  incomeByCategory: { category: string; cents: number }[]
+  /** positive numbers */
+  expenseByCategory: { category: string; cents: number }[]
+  totalIncomeCents: number
+  totalExpenseCents: number
+  netCents: number
+}
+
 export interface DuesbookApi {
   getStatus: () => Promise<AppStatus>
   chooseBackupDir: () => Promise<string | null>
@@ -262,4 +274,7 @@ export interface DuesbookApi {
     amountCents: number | null,
     note: string | null
   ) => Promise<void>
+  getTreasurerReport: (dateFrom: string, dateTo: string) => Promise<TreasurerReport>
+  /** opens a save dialog; returns the saved path or null if cancelled */
+  saveCsv: (defaultName: string, content: string) => Promise<string | null>
 }

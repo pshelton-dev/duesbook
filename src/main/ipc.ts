@@ -11,10 +11,12 @@ import type {
   WizardMember,
   WizardPayload
 } from '../shared/types'
+import { writeFileSync } from 'fs'
 import { getDbPath, getSchemaVersion, openDb } from './db'
 import * as dues from './dues'
 import * as ledger from './ledger'
 import * as members from './members'
+import { treasurerReport } from './reports'
 import { completeWizard } from './wizard'
 
 export function registerIpc(): void {
@@ -94,5 +96,22 @@ export function registerIpc(): void {
     'dues:set-override',
     (_e, memberId: number, periodId: number, amountCents: number | null, note: string | null) =>
       dues.setOverride(openDb(), memberId, periodId, amountCents, note)
+  )
+
+  ipcMain.handle('reports:treasurer', (_e, dateFrom: string, dateTo: string) =>
+    treasurerReport(openDb(), dateFrom, dateTo)
+  )
+
+  ipcMain.handle(
+    'file:save-csv',
+    async (_e, defaultName: string, content: string): Promise<string | null> => {
+      const result = await dialog.showSaveDialog({
+        defaultPath: defaultName,
+        filters: [{ name: 'CSV', extensions: ['csv'] }]
+      })
+      if (result.canceled || !result.filePath) return null
+      writeFileSync(result.filePath, content, 'utf8')
+      return result.filePath
+    }
   )
 }

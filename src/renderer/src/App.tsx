@@ -4,6 +4,7 @@ import Home from './screens/Home'
 import Dues from './screens/dues/Dues'
 import Ledger from './screens/ledger/Ledger'
 import Members from './screens/members/Members'
+import Reports from './screens/reports/Reports'
 import Placeholder from './screens/Placeholder'
 import Wizard from './screens/wizard/Wizard'
 
@@ -59,6 +60,8 @@ export default function App(): React.JSX.Element {
           <Members />
         ) : screen === 'dues' ? (
           <Dues />
+        ) : screen === 'reports' ? (
+          <Reports org={status.organization} />
         ) : (
           <Placeholder name={SCREENS.find((s) => s.id === screen)!.label} />
         )}

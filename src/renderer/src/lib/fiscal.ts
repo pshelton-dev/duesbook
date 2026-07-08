@@ -23,6 +23,34 @@ export function currentFiscalPeriod(startMonth: number, today = new Date()): Fis
   return { label, startDate, endDate }
 }
 
+/** The fiscal year `offset` years before the current one (0 = current). */
+export function fiscalPeriodShifted(
+  startMonth: number,
+  offset: number,
+  today = new Date()
+): FiscalPeriod {
+  const current = currentFiscalPeriod(startMonth, today)
+  const startYear = Number(current.startDate.slice(0, 4)) - offset
+  const shift = (iso: string, years: number): string =>
+    `${Number(iso.slice(0, 4)) + years}${iso.slice(4)}`
+  const label =
+    startMonth === 1 ? `${startYear}` : `${startYear}–${startYear + 1}`
+  return {
+    label,
+    startDate: shift(current.startDate, -offset),
+    endDate: shift(current.endDate, -offset)
+  }
+}
+
+/** First and last day of the calendar month `offset` months ago (0 = this month). */
+export function monthRange(offset: number, today = new Date()): { from: string; to: string } {
+  const first = new Date(today.getFullYear(), today.getMonth() - offset, 1)
+  const last = new Date(today.getFullYear(), today.getMonth() - offset + 1, 0)
+  const iso = (d: Date): string =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return { from: iso(first), to: iso(last) }
+}
+
 export const MONTH_NAMES = [
   'January',
   'February',
