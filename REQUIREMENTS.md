@@ -79,9 +79,10 @@ treasurer turnover is normal, not exceptional.
   Windows code-signing certificate, to avoid Gatekeeper/SmartScreen warnings.
 
 ## Open items (must settle before public release)
-- [ ] **License** — deliberately deferred. Must be chosen before the repo goes
-      public (unlicensed public code is "all rights reserved"). Leading
-      candidate: MIT.
+- [x] **License: MIT** (decided 2026-07-08 after reviewing MIT / MPL-2.0 /
+      GPLv3 / Apache-2.0 — simplicity and adoption won; keeps the Mac App
+      Store option open, accepts the low risk of closed forks). LICENSE file
+      in repo root.
 
 ## Resolved after initial draft
 - Member record fields: name, email, phone, address, join date, notes
