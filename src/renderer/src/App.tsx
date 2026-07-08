@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import type { AppStatus } from '../../shared/types'
 import Home from './screens/Home'
 import Placeholder from './screens/Placeholder'
+import Wizard from './screens/wizard/Wizard'
 
 const SCREENS = [
   { id: 'home', label: 'Home' },
@@ -15,6 +17,21 @@ type ScreenId = (typeof SCREENS)[number]['id']
 
 export default function App(): React.JSX.Element {
   const [screen, setScreen] = useState<ScreenId>('home')
+  const [status, setStatus] = useState<AppStatus | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const refresh = useCallback(() => {
+    window.duesbook
+      .getStatus()
+      .then(setStatus)
+      .catch((e) => setError(String(e)))
+  }, [])
+
+  useEffect(refresh, [refresh])
+
+  if (error) return <div className="panel error">Could not reach the database: {error}</div>
+  if (!status) return <div className="panel">Loading…</div>
+  if (!status.organization) return <Wizard onDone={refresh} />
 
   return (
     <div className="app">
@@ -31,7 +48,11 @@ export default function App(): React.JSX.Element {
         ))}
       </nav>
       <main className="content">
-        {screen === 'home' ? <Home /> : <Placeholder name={SCREENS.find((s) => s.id === screen)!.label} />}
+        {screen === 'home' ? (
+          <Home status={status} />
+        ) : (
+          <Placeholder name={SCREENS.find((s) => s.id === screen)!.label} />
+        )}
       </main>
     </div>
   )

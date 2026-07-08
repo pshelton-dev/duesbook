@@ -1,31 +1,20 @@
-import { useEffect, useState } from 'react'
 import type { AppStatus } from '../../../shared/types'
+import { MONTH_NAMES } from '../lib/fiscal'
 
-export default function Home(): React.JSX.Element {
-  const [status, setStatus] = useState<AppStatus | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    window.duesbook
-      .getStatus()
-      .then(setStatus)
-      .catch((e) => setError(String(e)))
-  }, [])
-
-  if (error) return <div className="panel error">Could not reach the database: {error}</div>
-  if (!status) return <div className="panel">Loading…</div>
+export default function Home({ status }: { status: AppStatus }): React.JSX.Element {
+  const org = status.organization!
 
   return (
     <div>
       <h1>Home</h1>
-      {status.organization === null ? (
-        <div className="panel notice">
-          <strong>Welcome to Duesbook.</strong> No organization is set up yet — the first-run
-          wizard will live here.
-        </div>
-      ) : (
-        <div className="panel">
-          Books for <strong>{status.organization.name}</strong>
+      <div className="panel">
+        Books for <strong>{org.name}</strong> · fiscal year starts in{' '}
+        {MONTH_NAMES[org.fiscalYearStartMonth - 1]}
+      </div>
+      {org.backupDir === null && (
+        <div className="panel warn">
+          <strong>Automatic backups are not set up.</strong> If this computer is lost, your
+          organization&rsquo;s books go with it. Choose a backup folder in Settings.
         </div>
       )}
       <div className="panel meta-panel">
