@@ -104,7 +104,8 @@ export default function Dues(): React.JSX.Element {
 
   return (
     <div>
-      <div className="ledger-header">
+      <div className="detail-header">
+        <h1>Dues</h1>
         <div className="btn-row">
           <select
             value={periodId ?? ''}
@@ -129,13 +130,13 @@ export default function Dues(): React.JSX.Element {
           <button className="btn small" onClick={openNewPeriod}>
             New period
           </button>
+          <button
+            className="btn primary"
+            onClick={() => setDrawer({ kind: 'payment', memberId: null, allocate: null })}
+          >
+            Record payment
+          </button>
         </div>
-        <button
-          className="btn primary"
-          onClick={() => setDrawer({ kind: 'payment', memberId: null, allocate: null })}
-        >
-          Record payment
-        </button>
       </div>
 
       {summary && (
@@ -148,7 +149,7 @@ export default function Dues(): React.JSX.Element {
             <span className="summary-label">Outstanding</span>
             <span className="summary-value">{formatCents(summary.outstandingCents)}</span>
           </div>
-          <div className="summary-item">
+          <div className="summary-item hero">
             <span className="summary-label">Paid in full</span>
             <span className="summary-value">
               {summary.paidCount} of {summary.expectedCount}
@@ -197,7 +198,7 @@ export default function Dues(): React.JSX.Element {
         <thead>
           <tr>
             <th>Member</th>
-            <th className="num">Owes</th>
+            <th className="num">Owed</th>
             <th className="num">Paid</th>
             <th className="num">Outstanding</th>
             <th>Status</th>
@@ -207,7 +208,7 @@ export default function Dues(): React.JSX.Element {
         <tbody>
           {visible.map((r) => (
             <tr key={r.memberId}>
-              <td>
+              <td className="strong">
                 {r.lastName}
                 {r.lastName && r.firstName ? ', ' : ''}
                 {r.firstName}
@@ -219,7 +220,7 @@ export default function Dues(): React.JSX.Element {
                 {r.outstandingCents > 0 ? formatCents(r.outstandingCents) : '—'}
               </td>
               <td>
-                <StatusChip status={r.status} owedCents={0} />
+                <StatusChip status={r.status} />
               </td>
               <td className="row-actions">
                 {r.outstandingCents > 0 && (

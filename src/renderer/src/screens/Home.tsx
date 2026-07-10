@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import type { AppStatus, HomeSummary, UpdateInfo } from '../../../shared/types'
-import { MONTH_NAMES } from '../lib/fiscal'
 import { formatCents } from '../lib/money'
 
 const STALE_BACKUP_DAYS = 7
+
+function shortDate(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  })
+}
 
 export default function Home({
   status,
@@ -34,14 +40,14 @@ export default function Home({
   const backupAgeDays = status.lastBackupAt
     ? (Date.now() - new Date(status.lastBackupAt).getTime()) / (24 * 60 * 60 * 1000)
     : null
-  const backupWarning =
-    org.backupDir === null
-      ? 'Automatic backups are not set up. If this computer is lost, the books go with it.'
-      : backupAgeDays === null
-        ? 'No backup has been made yet — one will be written next launch, or back up now.'
-        : backupAgeDays > STALE_BACKUP_DAYS
-          ? `Last backup was ${Math.floor(backupAgeDays)} days ago.`
-          : null
+  const backupNotConfigured = org.backupDir === null
+  const backupWarning = backupNotConfigured
+    ? 'Automatic backups are not set up. If this computer is lost, the books go with it.'
+    : backupAgeDays === null
+      ? 'No backup has been made yet — one will be written next launch, or back up now.'
+      : backupAgeDays > STALE_BACKUP_DAYS
+        ? `Last backup was ${Math.floor(backupAgeDays)} days ago.`
+        : null
 
   const paidPct =
     summary.dues && summary.dues.expectedCount > 0
@@ -50,68 +56,23 @@ export default function Home({
 
   return (
     <div>
-      <h1>{org.name}</h1>
-      <p className="hint">Fiscal year starts in {MONTH_NAMES[org.fiscalYearStartMonth - 1]}</p>
-
-      {update && !updateDismissed && (
-        <div className="panel notice">
-          Duesbook {update.version} is available —{' '}
-          <a href={update.url} target="_blank" rel="noreferrer">
-            see what changed and download it
-          </a>
-          . Your books are untouched by updates.{' '}
-          <button className="btn small" onClick={() => setUpdateDismissed(true)}>
-            Dismiss
-          </button>
-        </div>
-      )}
-      {backupWarning && (
-        <div className="panel warn">
-          <strong>{backupWarning}</strong>{' '}
-          <button className="btn small" onClick={() => onNavigate('settings')}>
-            Open backup settings
-          </button>
-        </div>
-      )}
-      {summary.unallocatedCount > 0 && (
-        <div className="panel warn">
-          {summary.unallocatedCount} dues deposit{summary.unallocatedCount > 1 ? 's' : ''} not
-          yet allocated to members.{' '}
-          <button className="btn small" onClick={() => onNavigate('dues')}>
-            Allocate
-          </button>
-        </div>
-      )}
-      {summary.arrears.members.length > 0 && (
-        <div className="panel error">
-          <strong>
-            {summary.arrears.members.length} member
-            {summary.arrears.members.length > 1 ? 's are' : ' is'} {summary.arrears.threshold}+
-            months behind on dues:
-          </strong>
-          <ul className="arrears-list">
-            {summary.arrears.members.map((m) => (
-              <li key={m.memberId}>
-                {m.firstName} {m.lastName} — {m.periodsBehind} months,{' '}
-                {formatCents(m.owedCents)} owed
-              </li>
-            ))}
-          </ul>
-          <button className="btn small" onClick={() => onNavigate('dues')}>
-            Open dues
-          </button>
-        </div>
-      )}
+      <h1>Home</h1>
 
       <div className="balance-cards">
         {summary.accounts.map((a) => (
           <div key={a.id} className="balance-card">
+            <div className="icon-tile">
+              <span className="dot" />
+            </div>
             <div className="summary-label">{a.name}</div>
             <div className="summary-value">{formatCents(a.balanceCents)}</div>
           </div>
         ))}
         {summary.accounts.length > 1 && (
           <div className="balance-card total">
+            <div className="icon-tile on-green">
+              <span className="dot" />
+            </div>
             <div className="summary-label">Total</div>
             <div className="summary-value">{formatCents(totalCents)}</div>
           </div>
@@ -119,33 +80,57 @@ export default function Home({
       </div>
 
       {summary.dues && (
-        <div className="panel dues-progress">
-          <div className="dues-progress-head">
-            <strong>Dues · {summary.duesPeriodLabel}</strong>
-            <span>
-              {summary.dues.paidCount} of {summary.dues.expectedCount} paid in full ·{' '}
+        <div className="dues-progress">
+          <div className="progress-ring" style={{ '--pct': paidPct } as React.CSSProperties} />
+          <div className="dues-progress-body">
+            <div className="dues-progress-head">
+              <h2>Dues · {summary.duesPeriodLabel}</h2>
+              <button className="link-btn" onClick={() => onNavigate('dues')}>
+                View Dues →
+              </button>
+            </div>
+            <div className="dues-progress-sub">
+              {summary.dues.paidCount} of {summary.dues.expectedCount} paid ·{' '}
               {formatCents(summary.dues.collectedCents)} collected ·{' '}
               {formatCents(summary.dues.outstandingCents)} outstanding
-            </span>
-          </div>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${paidPct}%` }} />
+            </div>
           </div>
         </div>
       )}
 
-      <h2>Recent activity</h2>
+      {summary.arrears.members.length > 0 && (
+        <div className="arrears-card">
+          <div className="arrears-head">
+            <span className="diamond" />
+            <h2>Arrears</h2>
+          </div>
+          {summary.arrears.members.map((m) => (
+            <div key={m.memberId} className="arrears-row">
+              <span className="who">
+                {m.firstName} {m.lastName}{' '}
+                <span className="months">· {m.periodsBehind} mo behind</span>
+              </span>
+              <span className="amount">{formatCents(m.owedCents)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h2>Recent Transactions</h2>
       {summary.recent.length === 0 ? (
         <div className="panel">No transactions yet.</div>
       ) : (
-        <table className="register">
+        <table className="mini-table">
           <tbody>
             {summary.recent.map((r) => (
               <tr key={r.id} className="register-row" onClick={() => onNavigate('ledger')}>
-                <td className="nowrap">{r.date}</td>
+                <td className="tile-cell">
+                  <span className="row-tile" />
+                </td>
+                <td className="date">{shortDate(r.date)}</td>
                 <td>{r.description}</td>
-                <td>{r.categoryName ?? '—'}</td>
-                <td>{r.accountName}</td>
+                <td className="date">{r.categoryName ?? '—'}</td>
+                <td className="date">{r.accountName}</td>
                 <td className={`num ${r.amountCents > 0 ? 'pos' : ''}`}>
                   {formatCents(r.amountCents)}
                 </td>
@@ -153,6 +138,45 @@ export default function Home({
             ))}
           </tbody>
         </table>
+      )}
+
+      {(backupWarning || (update && !updateDismissed) || summary.unallocatedCount > 0) && (
+        <div className="health-strip">
+          {backupWarning && (
+            <div className={`notice-card ${backupNotConfigured ? 'danger' : 'warn'}`}>
+              <span className={`diamond ${backupNotConfigured ? '' : 'warn'}`} />
+              <span className="grow">{backupWarning}</span>
+              <button className="action" onClick={() => onNavigate('settings')}>
+                Open backup settings
+              </button>
+            </div>
+          )}
+          {summary.unallocatedCount > 0 && (
+            <div className="notice-card warn">
+              <span className="diamond warn" />
+              <span className="grow">
+                {summary.unallocatedCount} dues deposit
+                {summary.unallocatedCount > 1 ? 's' : ''} not yet allocated to members.
+              </span>
+              <button className="action" onClick={() => onNavigate('dues')}>
+                Allocate
+              </button>
+            </div>
+          )}
+          {update && !updateDismissed && (
+            <div className="notice-card neutral">
+              <span className="grow">
+                Update available — v{update.version} ·{' '}
+                <a href={update.url} target="_blank" rel="noreferrer">
+                  see what changed
+                </a>
+              </span>
+              <button className="dismiss" onClick={() => setUpdateDismissed(true)}>
+                ×
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

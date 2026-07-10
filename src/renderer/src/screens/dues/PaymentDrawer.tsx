@@ -99,11 +99,13 @@ export default function PaymentDrawer({
   }
 
   return (
-    <div className="drawer">
+    <>
+      <div className="scrim" onClick={onClose} />
+      <div className="drawer wide">
       <div className="drawer-header">
-        <h2>{allocateTarget ? 'Allocate deposit' : 'Record dues payment'}</h2>
-        <button className="btn small" onClick={onClose}>
-          Close
+        <h2>{allocateTarget ? 'Allocate deposit' : 'Record payment'}</h2>
+        <button className="drawer-close" onClick={onClose} aria-label="Close">
+          ×
         </button>
       </div>
 
@@ -235,10 +237,16 @@ export default function PaymentDrawer({
 
       <div className="drawer-footer">
         <span />
-        <button className="btn primary" onClick={save} disabled={busy || picked.length === 0}>
-          {busy ? 'Saving…' : allocateTarget ? 'Allocate' : 'Save payment'}
-        </button>
+        <div className="btn-row">
+          <button className="btn" onClick={onClose} disabled={busy}>
+            Cancel
+          </button>
+          <button className="btn primary" onClick={save} disabled={busy || picked.length === 0}>
+            {busy ? 'Saving…' : allocateTarget ? 'Allocate' : 'Save payment'}
+          </button>
+        </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

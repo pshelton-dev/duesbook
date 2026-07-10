@@ -62,6 +62,7 @@ export default function Ledger(): React.JSX.Element {
 
   return (
     <div className="ledger">
+      <h1>Ledger</h1>
       <div className="ledger-header">
         <div className="account-tabs">
           {accounts
@@ -78,7 +79,7 @@ export default function Ledger(): React.JSX.Element {
             ))}
         </div>
         <button className="btn primary" onClick={() => setDrawer('new')}>
-          Add transaction
+          New transaction
         </button>
       </div>
 
@@ -147,29 +148,35 @@ export default function Ledger(): React.JSX.Element {
               <th>Payee</th>
               <th>Category</th>
               <th>Memo</th>
-              <th className="center" title="Cleared against a bank statement">
-                ✓
-              </th>
               <th className="num">Amount</th>
               <th className="num">Balance</th>
+              <th className="center" title="Cleared against a bank statement">
+                Cleared
+              </th>
             </tr>
           </thead>
           <tbody>
             {txns.map((t) => (
               <tr key={t.id} onClick={() => setDrawer(t)} className="register-row">
-                <td className="nowrap">{t.date}</td>
+                <td className="date">{t.date}</td>
                 <td>
                   {t.type === 'transfer'
                     ? `Transfer ${t.amountCents < 0 ? '→' : '←'} ${t.peerAccountName ?? '?'}`
                     : t.payee}
                   {t.categoryName === 'Dues' && t.type === 'income' && (
                     <span className={`badge ${t.duesAllocatedCents > 0 ? 'ok' : 'warn'}`}>
-                      {t.duesAllocatedCents > 0 ? 'dues' : 'dues · unallocated'}
+                      {t.duesAllocatedCents > 0 ? 'DUES' : 'DUES · UNALLOCATED'}
                     </span>
                   )}
                 </td>
-                <td>{t.type === 'transfer' ? '—' : t.categoryName}</td>
+                <td className="date">{t.type === 'transfer' ? '—' : t.categoryName}</td>
                 <td className="memo">{t.memo}</td>
+                <td className={`num ${t.amountCents > 0 && t.type === 'income' ? 'pos' : ''}`}>
+                  {formatCents(t.amountCents)}
+                </td>
+                <td className="num balance">
+                  {filtersActive ? '' : formatCents(t.runningBalanceCents)}
+                </td>
                 <td className="center" onClick={(e) => e.stopPropagation()}>
                   <input
                     type="checkbox"
@@ -177,12 +184,6 @@ export default function Ledger(): React.JSX.Element {
                     onChange={() => toggleCleared(t)}
                     title="Cleared against a bank statement"
                   />
-                </td>
-                <td className={`num ${t.amountCents > 0 && t.type === 'income' ? 'pos' : ''}`}>
-                  {formatCents(t.amountCents)}
-                </td>
-                <td className="num balance">
-                  {filtersActive ? '' : formatCents(t.runningBalanceCents)}
                 </td>
               </tr>
             ))}

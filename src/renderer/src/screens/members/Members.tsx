@@ -13,13 +13,8 @@ const STATUS_LABELS: Record<DuesStatus, string> = {
   na: '—'
 }
 
-export function StatusChip({ status, owedCents }: { status: DuesStatus; owedCents: number }): React.JSX.Element {
-  return (
-    <span className={`chip chip-${status}`} title={owedCents > 0 ? `${formatCents(owedCents)} outstanding` : undefined}>
-      {STATUS_LABELS[status]}
-      {owedCents > 0 && ` · ${formatCents(owedCents)}`}
-    </span>
-  )
+export function StatusChip({ status }: { status: DuesStatus }): React.JSX.Element {
+  return <span className={`status status-${status}`}>{STATUS_LABELS[status]}</span>
 }
 
 export default function Members(): React.JSX.Element {
@@ -71,8 +66,8 @@ export default function Members(): React.JSX.Element {
         <div className="detail-header">
           <h1>
             {detail.firstName} {detail.lastName}
-            {detail.leftDate && <span className="chip chip-na">Left {detail.leftDate}</span>}
-            {detail.duesExempt && <span className="chip chip-exempt">Exempt</span>}
+            {detail.leftDate && <span className="tag">Left {detail.leftDate}</span>}
+            {detail.duesExempt && <span className="tag">Exempt</span>}
           </h1>
           <button className="btn" onClick={() => setDrawer('edit')}>
             Edit
@@ -105,7 +100,7 @@ export default function Members(): React.JSX.Element {
                 <tr key={h.periodLabel}>
                   <td>{h.periodLabel}</td>
                   <td>
-                    <StatusChip status={h.status} owedCents={0} />
+                    <StatusChip status={h.status} />
                   </td>
                   <td className="num">{formatCents(h.paidCents)}</td>
                   <td className="num">{h.owedCents > 0 ? formatCents(h.owedCents) : '—'}</td>
@@ -192,33 +187,34 @@ export default function Members(): React.JSX.Element {
         <table className="register">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
+              <th>Member</th>
+              <th>Contact</th>
               <th>Joined</th>
-              <th>Dues owed (all months)</th>
+              <th className="right">Status</th>
+              <th className="num">Due</th>
+              <th className="num">Behind</th>
             </tr>
           </thead>
           <tbody>
             {visible.map((m) => (
               <tr key={m.id} className="register-row" onClick={() => openDetail(m.id)}>
-                <td>
+                <td className="strong">
                   {m.lastName}
                   {m.lastName && m.firstName ? ', ' : ''}
                   {m.firstName}
-                  {m.leftDate && <span className="chip chip-na">left</span>}
+                  {m.leftDate && <span className="tag">left</span>}
                 </td>
-                <td>{m.email}</td>
-                <td>{m.phone}</td>
-                <td className="nowrap">{m.joinDate}</td>
-                <td>
-                  <span className={`chip chip-${m.duesStatus}`}>
-                    {m.duesStatus === 'owed'
-                      ? `Owed · ${formatCents(m.owedCents)}` +
-                        (m.periodsBehind > 1 ? ` · ${m.periodsBehind} mo` : '')
-                      : STATUS_LABELS[m.duesStatus]}
-                  </span>
+                <td className="contact">
+                  {m.email}
+                  {m.email && m.phone ? <br /> : null}
+                  {m.phone}
                 </td>
+                <td className="date">{m.joinDate}</td>
+                <td className="right">
+                  <StatusChip status={m.duesStatus} />
+                </td>
+                <td className="num strong">{m.owedCents > 0 ? formatCents(m.owedCents) : '—'}</td>
+                <td className="num behind">{m.periodsBehind > 0 ? `${m.periodsBehind} mo` : '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -236,11 +232,13 @@ export default function Members(): React.JSX.Element {
         />
       )}
       {drawer === 'import' && (
+        <>
+        <div className="scrim" onClick={() => setDrawer('closed')} />
         <div className="drawer wide">
           <div className="drawer-header">
             <h2>Import members from CSV</h2>
-            <button className="btn small" onClick={() => setDrawer('closed')}>
-              Close
+            <button className="drawer-close" onClick={() => setDrawer('closed')} aria-label="Close">
+              ×
             </button>
           </div>
           <p className="hint">
@@ -250,6 +248,7 @@ export default function Members(): React.JSX.Element {
           </p>
           <MemberCsvImport onImport={importMembers} importLabel="Import these members" />
         </div>
+        </>
       )}
     </div>
   )

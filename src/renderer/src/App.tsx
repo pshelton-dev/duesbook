@@ -48,6 +48,7 @@ export default function App(): React.JSX.Element {
             className={`nav-item ${screen === s.id ? 'active' : ''}`}
             onClick={() => setScreen(s.id)}
           >
+            <span className="nav-dot" />
             {s.label}
           </button>
         ))}

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #f4f5f2; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px; color: #16281a; background: #f4f5f2; min-height: 100vh;">
+
+  <!-- Sidebar -->
+  <div style="width: 200px; flex-shrink: 0; background: #fff; border-right: 1px solid #e7e9e4; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; padding: 22px 0;">
+    <div style="padding: 0 20px 22px; font-size: 16px; font-weight: 700; letter-spacing: -0.3px;">Duesbook</div>
+    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+      <div onClick="{{ item.onClick }}" style="margin: 2px 14px; padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: {{ item.fg }}; background: {{ item.bg }}; display: flex; align-items: center; gap: 9px;" style-hover="background: {{ item.hoverBg }};">
+        <span style="width: 8px; height: 8px; border-radius: 3px; background: {{ item.dotBg }}; opacity: {{ item.dotOpacity }}; flex-shrink: 0;"></span>
+        {{ item.label }}
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- Content -->
+  <div style="margin-left: 200px; padding: 26px 32px 64px; min-height: 100vh; max-width: 920px;">
+
+    <!-- ===================== HOME ===================== -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <h1 style="font-size: 23px; font-weight: 700; letter-spacing: -0.3px; margin: 0 0 20px;">Home</h1>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+        <sc-for list="{{ accounts }}" as="acct" hint-placeholder-count="2">
+          <div style="background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 4px 14px rgba(20,60,30,.06);">
+            <div style="width: 32px; height: 32px; border-radius: 9px; background: #e3f2e6; display: flex; align-items: center; justify-content: center; margin-bottom: 14px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #2e7d46;"></span></div>
+            <div style="font-size: 11px; color: #8a938c;">{{ acct.name }}</div>
+            <div style="font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px;">{{ acct.balanceStr }}</div>
+          </div>
+        </sc-for>
+        <div style="background: linear-gradient(135deg, #379a55, #2e7d46); border-radius: 14px; padding: 18px; box-shadow: 0 4px 14px rgba(20,60,30,.16);">
+          <div style="width: 32px; height: 32px; border-radius: 9px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; margin-bottom: 14px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #fff;"></span></div>
+          <div style="font-size: 11px; color: rgba(255,255,255,.8);">Total</div>
+          <div style="font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums; color: #fff; margin-top: 2px;">{{ totalBalanceStr }}</div>
+        </div>
+      </div>
+
+      <!-- Dues progress -->
+      <div style="background: #fff; border-radius: 14px; padding: 18px 20px; margin-top: 14px; border-left: 3px solid #2e7d46; display: flex; gap: 16px; align-items: center;">
+        <div style="width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0; position: relative;">
+          <div style="position: absolute; inset: 6px; border-radius: 50%; border: 4px solid #dcecdf;"></div>
+          <div style="position: absolute; inset: 6px; border-radius: 50%; border: 4px solid #2e7d46; border-right-color: transparent; border-bottom-color: transparent; transform: rotate(45deg);"></div>
+        </div>
+        <div style="flex: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <h2 style="font-size: 15px; font-weight: 700; margin: 0;">Dues &middot; July 2026</h2>
+            <a href="#" onClick="{{ goDues }}" style="font-size: 13px; color: #2e7d46; text-decoration: none; font-weight: 600;" style-hover="text-decoration: underline;">View Dues &rarr;</a>
+          </div>
+          <div style="font-size: 12.5px; color: #8a938c; margin-top: 3px;">4 of 6 paid &middot; $340.00 collected &middot; $170.00 outstanding</div>
+        </div>
+      </div>
+
+      <!-- Arrears -->
+      <div style="background: #fdf0ed; border-radius: 14px; padding: 16px 20px; margin-top: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <span style="width: 8px; height: 8px; transform: rotate(45deg); background: #c1523f; flex-shrink: 0;"></span>
+          <h2 style="font-size: 14px; font-weight: 700; margin: 0; color: #a5402f;">Arrears</h2>
+        </div>
+        <sc-for list="{{ arrears }}" as="m" hint-placeholder-count="2">
+          <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px;">
+            <span style="white-space: nowrap;">{{ m.name }} <span style="color: #b56a5c; font-size: 11px;">&middot; {{ m.monthsLabel }}</span></span>
+            <span style="font-weight: 700; font-variant-numeric: tabular-nums; color: #a5402f;">{{ m.amountStr }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+
+        <!-- Health strip -->
+        <div style="order: {{ healthOrder }}; display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: #fff9e9; border-radius: 12px; padding: 12px 18px; display: flex; align-items: center; gap: 10px; border-left: 3px solid #cf9a3e;">
+            <span style="width: 8px; height: 8px; transform: rotate(45deg); background: #cf9a3e; flex-shrink: 0;"></span>
+            <span style="flex: 1; font-size: 13px; color: #8a6420;">Last backup was 14 days ago.</span>
+            <span style="font-size: 13px; font-weight: 700; color: #8a6420; cursor: pointer;">Back up now</span>
+          </div>
+          <sc-if value="{{ showUpdateNotice }}" hint-placeholder-val="{{ true }}">
+            <div style="background: #eef0f4; border-radius: 12px; padding: 12px 18px; display: flex; align-items: center; gap: 10px; border-left: 3px solid #7a8a94;">
+              <span style="flex: 1; font-size: 13px; color: #4a5568;">Update available &mdash; v2.4.1</span>
+              <span onClick="{{ dismissUpdate }}" style="cursor: pointer; color: #97a0a8; font-size: 16px; line-height: 1;">&times;</span>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- Recent transactions -->
+        <div style="order: {{ recentOrder }};">
+          <h2 style="font-size: 14px; font-weight: 700; margin: 0 0 10px;">Recent Transactions</h2>
+          <div style="background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20,60,30,.06); overflow: hidden;">
+            <sc-for list="{{ recentTx }}" as="tx" hint-placeholder-count="6">
+              <div onClick="{{ goLedgerFromHome }}" style="display: flex; align-items: center; gap: 12px; padding: 11px 18px; font-size: 13px; border-top: 1px solid #f0f2ee; cursor: pointer;" style-hover="background: #f7f9f6;">
+                <span style="width: 22px; height: 22px; border-radius: 7px; background: #eef2ec; flex-shrink: 0;"></span>
+                <span style="width: 52px; color: #8a938c;">{{ tx.date }}</span>
+                <span style="flex: 1;">{{ tx.payee }}</span>
+                <span style="color: #8a938c; width: 90px;">{{ tx.category }}</span>
+                <span style="font-variant-numeric: tabular-nums; color: {{ tx.amountColor }}; font-weight: 600; width: 80px; text-align: right;">{{ tx.amountStr }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <!-- ===================== LEDGER ===================== -->
+    <sc-if value="{{ isLedger }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size: 23px; font-weight: 700; letter-spacing: -0.3px; margin: 0 0 20px;">Ledger</h1>
+
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <sc-for list="{{ ledgerAccounts }}" as="acct" hint-placeholder-count="2">
+            <div onClick="{{ acct.onClick }}" style="cursor: pointer; border-radius: 12px; padding: 10px 18px; min-width: 150px; background: {{ acct.bg }}; box-shadow: {{ acct.shadow }};">
+              <div style="font-size: 12px; color: {{ acct.labelColor }};">{{ acct.name }}</div>
+              <div style="font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; color: {{ acct.balanceColor }};">{{ acct.balanceStr }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ openNewTransaction }}" style="background: #2e7d46; color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background: #256339;">
+          New transaction
+        </button>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap;">
+        <input placeholder="Search payee or memo" value="{{ search }}" onInput="{{ setSearch }}" style="border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px; width: 200px; background: #fff;" />
+        <select style="border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 10px; font-size: 13px; color: #16281a; background: #fff;">
+          <option>All categories</option>
+          <option>Dues</option>
+          <option>Utilities</option>
+          <option>Postage</option>
+          <option>Supplies</option>
+          <option>Rent</option>
+        </select>
+        <label style="display: flex; align-items: center; gap: 7px; font-size: 13px; color: #6f7a72; cursor: pointer; margin-left: 4px;">
+          <input type="checkbox" checked="{{ unclearedOnly }}" onChange="{{ toggleUnclearedOnly }}" />
+          Uncleared only
+        </label>
+      </div>
+
+      <!-- Register table -->
+      <div style="margin-top: 16px; background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20,60,30,.06); overflow: hidden;">
+        <div style="display: flex; padding: 9px 18px; font-size: 11px; color: #8a938c; font-weight: 700;">
+          <span style="width: 70px;">Date</span>
+          <span style="flex: 1;">Payee</span>
+          <span style="width: 90px;">Category</span>
+          <span style="width: 140px;">Memo</span>
+          <span style="width: 80px; text-align: right;">Amount</span>
+          <span style="width: 80px; text-align: right;">Balance</span>
+          <span style="width: 60px; text-align: center;">Cleared</span>
+        </div>
+        <sc-for list="{{ visibleLedgerRows }}" as="row" hint-placeholder-count="10">
+          <div onClick="{{ row.onClick }}" style="display: flex; align-items: center; padding: 10px 18px; font-size: 13px; border-top: 1px solid #f0f2ee; cursor: pointer;" style-hover="background: #f7f9f6;">
+            <span style="width: 70px; color: #8a938c;">{{ row.date }}</span>
+            <span style="flex: 1;">
+              {{ row.payee }}
+              <sc-if value="{{ row.duesLinked }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 10px; font-weight: 700; background: #e3f2e6; color: #2e7d46; padding: 2px 8px; border-radius: 6px; margin-left: 6px;">DUES</span>
+              </sc-if>
+            </span>
+            <span style="width: 90px; color: #8a938c;">{{ row.category }}</span>
+            <span style="width: 140px; color: #8a938c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row.memo }}</span>
+            <span style="width: 80px; text-align: right; font-variant-numeric: tabular-nums; color: {{ row.amountColor }}; font-weight: 600;">{{ row.amountStr }}</span>
+            <span style="width: 80px; text-align: right; font-variant-numeric: tabular-nums; color: #8a938c;">{{ row.balanceStr }}</span>
+            <span style="width: 60px; text-align: center;" onClick="{{ row.stopClick }}">
+              <input type="checkbox" checked="{{ row.cleared }}" onChange="{{ row.toggleCleared }}" />
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- ===================== MEMBERS ===================== -->
+    <sc-if value="{{ isMembers }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px;">
+        <h1 style="font-size: 23px; font-weight: 700; letter-spacing: -0.3px; margin: 0;">Members</h1>
+        <div style="display: flex; gap: 8px;">
+          <button style="background: #fff; border: 1px solid #dde3dc; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer;">Import CSV</button>
+          <button style="background: #2e7d46; color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background: #256339;">Add member</button>
+        </div>
+      </div>
+
+      <div style="background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20,60,30,.06); overflow: hidden;">
+        <div style="display: flex; padding: 9px 18px; font-size: 11px; color: #8a938c; font-weight: 700;">
+          <span style="flex: 1;">Member</span>
+          <span style="width: 200px;">Contact</span>
+          <span style="width: 90px; text-align: right;">Status</span>
+          <span style="width: 80px; text-align: right;">Due</span>
+          <span style="width: 90px; text-align: right;">Behind</span>
+        </div>
+        <sc-for list="{{ members }}" as="m" hint-placeholder-count="6">
+          <div onClick="{{ m.onClick }}" style="display: flex; align-items: center; padding: 11px 18px; font-size: 13px; border-top: 1px solid #f0f2ee; cursor: pointer;" style-hover="background: #f7f9f6;">
+            <span style="flex: 1; font-weight: 600;">{{ m.name }}</span>
+            <span style="width: 200px; color: #8a938c;">{{ m.email }}</span>
+            <span style="width: 90px; text-align: right;">
+              <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: {{ m.statusColor }};">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ m.statusColor }};"></span>{{ m.statusLabel }}
+              </span>
+            </span>
+            <span style="width: 80px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;">{{ m.dueStr }}</span>
+            <span style="width: 90px; text-align: right; color: #8a938c;">{{ m.behindStr }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- ===================== DUES ===================== -->
+    <sc-if value="{{ isDues }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px;">
+        <h1 style="font-size: 23px; font-weight: 700; letter-spacing: -0.3px; margin: 0;">Dues &middot; July 2026</h1>
+        <button onClick="{{ openPayment }}" style="background: #2e7d46; color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background: #256339;">Record payment</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+        <div style="background: #fff; border-radius: 14px; padding: 16px 18px; box-shadow: 0 4px 14px rgba(20,60,30,.06);">
+          <div style="font-size: 11px; color: #8a938c;">Collected</div>
+          <div style="font-size: 20px; font-weight: 700; color: #2e7d46; font-variant-numeric: tabular-nums; margin-top: 4px;">$340.00</div>
+        </div>
+        <div style="background: #fff; border-radius: 14px; padding: 16px 18px; box-shadow: 0 4px 14px rgba(20,60,30,.06);">
+          <div style="font-size: 11px; color: #8a938c;">Outstanding</div>
+          <div style="font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 4px;">$170.00</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #379a55, #2e7d46); border-radius: 14px; padding: 16px 18px;">
+          <div style="font-size: 11px; color: rgba(255,255,255,.8);">Paid</div>
+          <div style="font-size: 20px; font-weight: 700; color: #fff; margin-top: 4px;">4 of 6</div>
+        </div>
+      </div>
+
+      <h2 style="font-size: 14px; font-weight: 700; margin: 20px 0 10px;">Period roster</h2>
+      <div style="background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20,60,30,.06); overflow: hidden;">
+        <div style="display: flex; padding: 9px 18px; font-size: 11px; color: #8a938c; font-weight: 700;">
+          <span style="flex: 1;">Member</span>
+          <span style="width: 80px; text-align: right;">Owed</span>
+          <span style="width: 80px; text-align: right;">Paid</span>
+          <span style="width: 90px; text-align: right;">Outstanding</span>
+          <span style="width: 90px; text-align: right;">Status</span>
+        </div>
+        <sc-for list="{{ duesRoster }}" as="d" hint-placeholder-count="6">
+          <div style="display: flex; align-items: center; padding: 11px 18px; font-size: 13px; border-top: 1px solid #f0f2ee;">
+            <span style="flex: 1; font-weight: 600;">{{ d.name }}</span>
+            <span style="width: 80px; text-align: right; font-variant-numeric: tabular-nums;">{{ d.owedStr }}</span>
+            <span style="width: 80px; text-align: right; font-variant-numeric: tabular-nums;">{{ d.paidStr }}</span>
+            <span style="width: 90px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;">{{ d.outstandingStr }}</span>
+            <span style="width: 90px; text-align: right;">
+              <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: {{ d.statusColor }};">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ d.statusColor }};"></span>{{ d.statusLabel }}
+              </span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- ===================== REPORTS / SETTINGS (stubs) ===================== -->
+    <sc-if value="{{ isStub }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size: 23px; font-weight: 700; letter-spacing: -0.3px; margin: 0 0 16px;">{{ stubTitle }}</h1>
+      <div style="background: #fff; border-radius: 14px; padding: 40px; box-shadow: 0 4px 14px rgba(20,60,30,.06); color: #8a938c; font-size: 13px;">
+        Not yet redesigned in this direction &mdash; happy to mock this up next.
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ===================== TRANSACTION DRAWER ===================== -->
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDrawer }}" style="position: fixed; inset: 0; background: rgba(20,40,26,0.10); z-index: 90;"></div>
+    <div style="position: fixed; right: 0; top: 0; height: 100vh; width: 380px; background: #fff; box-shadow: -8px 0 28px rgba(20,60,30,0.12); z-index: 100; display: flex; flex-direction: column;">
+      <div style="padding: 18px 22px; border-bottom: 1px solid #f0f2ee; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 15px; font-weight: 700; margin: 0;">{{ drawerTitle }}</h2>
+        <span onClick="{{ closeDrawer }}" style="cursor: pointer; color: #8a938c; font-size: 18px; line-height: 1;">&times;</span>
+      </div>
+      <div style="padding: 20px 22px; overflow-y: auto; flex: 1;">
+        <div style="display: flex; border-radius: 10px; background: #eef2ec; padding: 3px; margin-bottom: 18px;">
+          <sc-for list="{{ txTypes }}" as="t" hint-placeholder-count="3">
+            <div onClick="{{ t.onClick }}" style="flex: 1; text-align: center; padding: 7px 0; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; background: {{ t.bg }}; box-shadow: {{ t.shadow }};">
+              {{ t.label }}
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Date</div>
+            <input type="date" value="{{ txDraft.date }}" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Payee</div>
+            <input value="{{ txDraft.payee }}" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Category</div>
+            <select style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 10px; font-size: 13px;">
+              <option>Dues</option><option>Utilities</option><option>Postage</option><option>Supplies</option><option>Rent</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Memo</div>
+            <input value="{{ txDraft.memo }}" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Amount</div>
+            <input value="{{ txDraft.amountStr }}" style="width: 140px; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px; text-align: right; font-variant-numeric: tabular-nums;" />
+          </div>
+          <label style="display: flex; align-items: center; gap: 7px; font-size: 13px; color: #6f7a72; cursor: pointer;">
+            <input type="checkbox" checked="{{ txDraft.cleared }}" /> Cleared
+          </label>
+        </div>
+      </div>
+      <div style="padding: 16px 22px; border-top: 1px solid #f0f2ee; display: flex; justify-content: space-between; align-items: center;">
+        <button style="background: none; border: none; color: #c1523f; font-size: 13px; font-weight: 700; cursor: pointer; padding: 8px 4px;">Delete</button>
+        <div style="display: flex; gap: 8px;">
+          <button onClick="{{ closeDrawer }}" style="background: #fff; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;">Cancel</button>
+          <button onClick="{{ closeDrawer }}" style="background: #2e7d46; color: #fff; border: none; border-radius: 9px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background: #256339;">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== MEMBER DRAWER ===================== -->
+  <sc-if value="{{ memberDrawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMemberDrawer }}" style="position: fixed; inset: 0; background: rgba(20,40,26,0.10); z-index: 90;"></div>
+    <div style="position: fixed; right: 0; top: 0; height: 100vh; width: 380px; background: #fff; box-shadow: -8px 0 28px rgba(20,60,30,0.12); z-index: 100; display: flex; flex-direction: column;">
+      <div style="padding: 18px 22px; border-bottom: 1px solid #f0f2ee; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 15px; font-weight: 700; margin: 0;">{{ memberDraft.name }}</h2>
+        <span onClick="{{ closeMemberDrawer }}" style="cursor: pointer; color: #8a938c; font-size: 18px; line-height: 1;">&times;</span>
+      </div>
+      <div style="padding: 20px 22px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Name</div>
+          <input value="{{ memberDraft.name }}" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+        </div>
+        <div>
+          <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Email</div>
+          <input value="{{ memberDraft.email }}" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+        </div>
+        <h3 style="font-size: 13px; font-weight: 700; margin: 8px 0 0;">Dues history</h3>
+        <div style="background: #f7f9f6; border-radius: 10px; overflow: hidden;">
+          <sc-for list="{{ memberDraft.history }}" as="h" hint-placeholder-count="3">
+            <div style="display: flex; justify-content: space-between; padding: 8px 12px; font-size: 12.5px; border-top: 1px solid #eef1ee;">
+              <span style="color: #6f7a72;">{{ h.period }}</span>
+              <span style="font-weight: 600; color: {{ h.color }};">{{ h.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <label style="display: flex; align-items: center; gap: 7px; font-size: 13px; color: #6f7a72; cursor: pointer; margin-top: 4px;">
+          <input type="checkbox" /> Dues-exempt
+        </label>
+      </div>
+      <div style="padding: 16px 22px; border-top: 1px solid #f0f2ee; display: flex; justify-content: space-between; align-items: center;">
+        <button style="background: none; border: none; color: #c1523f; font-size: 13px; font-weight: 700; cursor: pointer; padding: 8px 4px;">Mark as left</button>
+        <div style="display: flex; gap: 8px;">
+          <button onClick="{{ closeMemberDrawer }}" style="background: #fff; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;">Cancel</button>
+          <button onClick="{{ closeMemberDrawer }}" style="background: #2e7d46; color: #fff; border: none; border-radius: 9px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background: #256339;">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== PAYMENT DRAWER ===================== -->
+  <sc-if value="{{ paymentDrawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePayment }}" style="position: fixed; inset: 0; background: rgba(20,40,26,0.10); z-index: 90;"></div>
+    <div style="position: fixed; right: 0; top: 0; height: 100vh; width: 480px; background: #fff; box-shadow: -8px 0 28px rgba(20,60,30,0.12); z-index: 100; display: flex; flex-direction: column;">
+      <div style="padding: 18px 22px; border-bottom: 1px solid #f0f2ee; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 15px; font-weight: 700; margin: 0;">Record payment</h2>
+        <span onClick="{{ closePayment }}" style="cursor: pointer; color: #8a938c; font-size: 18px; line-height: 1;">&times;</span>
+      </div>
+      <div style="padding: 20px 22px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Member</div>
+          <input placeholder="Type a name..." style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Amount</div>
+            <input value="$50.00" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px; text-align: right; font-variant-numeric: tabular-nums;" />
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Deposit account</div>
+            <select style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 10px; font-size: 13px;">
+              <option>Checking</option><option>Savings</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Date</div>
+            <input type="date" value="2026-07-09" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 12px; color: #8a938c; margin-bottom: 5px; font-weight: 600;">Check #</div>
+            <input placeholder="optional" style="width: 100%; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 12px; font-size: 13px;" />
+          </div>
+        </div>
+      </div>
+      <div style="padding: 16px 22px; border-top: 1px solid #f0f2ee; display: flex; justify-content: flex-end; gap: 8px;">
+        <button onClick="{{ closePayment }}" style="background: #fff; border: 1px solid #dde3dc; border-radius: 9px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;">Cancel</button>
+        <button onClick="{{ closePayment }}" style="background: #2e7d46; color: #fff; border: none; border-radius: 9px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background: #256339;">Save payment</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;recentBelowArrears&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Home layout&quot;}}">
+const NAV_ITEMS = ['Home', 'Ledger', 'Members', 'Dues', 'Reports', 'Settings'];
+
+const ACCOUNTS = [
+  { id: 'checking', name: 'Checking', balance: 4215.32 },
+  { id: 'savings', name: 'Savings', balance: 8900.00 },
+];
+
+const ARREARS = [
+  { name: 'Sam Reyes', amount: 100, months: 2 },
+  { name: 'Casey Lin', amount: 50, months: 1 },
+];
+
+const RECENT_TX = [
+  { date: 'Jul 6', payee: 'Sam Reyes', category: 'Dues', amount: 50 },
+  { date: 'Jul 3', payee: 'PO Box renewal', category: 'Postage', amount: -42 },
+  { date: 'Jul 1', payee: 'Riverside Hall', category: 'Rent', amount: -180 },
+  { date: 'Jun 28', payee: 'Jordan Pike', category: 'Dues', amount: 50 },
+  { date: 'Jun 24', payee: 'Office Depot', category: 'Supplies', amount: -36.4 },
+  { date: 'Jun 18', payee: 'Alex Moreau', category: 'Dues', amount: 50 },
+];
+
+const LEDGER_ROWS = {
+  checking: [
+    { date: '07/06/2026', payee: 'Sam Reyes', category: 'Dues', memo: 'Jul dues', amount: 50, balance: 4215.32, cleared: true, duesLinked: true },
+    { date: '07/03/2026', payee: 'PO Box renewal', category: 'Postage', memo: 'Annual box fee', amount: -42, balance: 4165.32, cleared: true, duesLinked: false },
+    { date: '07/01/2026', payee: 'Riverside Hall', category: 'Rent', memo: 'July meeting room', amount: -180, balance: 4207.32, cleared: false, duesLinked: false },
+    { date: '06/28/2026', payee: 'Jordan Pike', category: 'Dues', memo: 'Jun dues', amount: 50, balance: 4387.32, cleared: true, duesLinked: true },
+    { date: '06/24/2026', payee: 'Office Depot', category: 'Supplies', memo: 'Printer paper, folders', amount: -36.4, balance: 4337.32, cleared: true, duesLinked: false },
+    { date: '06/18/2026', payee: 'Alex Moreau', category: 'Dues', memo: 'Jun dues', amount: 50, balance: 4373.72, cleared: true, duesLinked: true },
+    { date: '06/12/2026', payee: 'Ferndale Insurance', category: 'Insurance', memo: 'Liability policy', amount: -210, balance: 4323.72, cleared: true, duesLinked: false },
+    { date: '06/05/2026', payee: 'Bake Sale', category: 'Fundraising', memo: 'Spring bake sale proceeds', amount: 186.5, balance: 4533.72, cleared: true, duesLinked: false },
+    { date: '05/30/2026', payee: 'Transfer to Savings', category: 'Transfer', memo: '', amount: -500, balance: 4347.22, cleared: true, duesLinked: false },
+    { date: '05/22/2026', payee: 'Casey Lin', category: 'Dues', memo: 'May dues', amount: 50, balance: 4847.22, cleared: true, duesLinked: true },
+  ],
+  savings: [
+    { date: '05/30/2026', payee: 'Transfer from Checking', category: 'Transfer', memo: '', amount: 500, balance: 8900.0, cleared: true, duesLinked: false },
+    { date: '01/15/2026', payee: 'Interest', category: 'Interest', memo: '', amount: 12.4, balance: 8400.0, cleared: true, duesLinked: false },
+  ],
+};
+
+const STATUS_COLOR = { paid: '#2e7d46', owed: '#c1523f', exempt: '#7a8a94' };
+const STATUS_LABEL = { paid: 'Paid', owed: 'Owed', exempt: 'Exempt' };
+
+const MEMBERS = [
+  { name: 'Alex Moreau', email: 'alex.moreau@mail.com', status: 'paid', due: 0, behind: 0 },
+  { name: 'Sam Reyes', email: 'sam.reyes@mail.com', status: 'owed', due: 100, behind: 2 },
+  { name: 'Casey Lin', email: 'casey.lin@mail.com', status: 'owed', due: 50, behind: 1 },
+  { name: 'Jordan Pike', email: 'jordan.pike@mail.com', status: 'paid', due: 0, behind: 0 },
+  { name: 'Riley Chen', email: 'riley.chen@mail.com', status: 'exempt', due: 0, behind: 0 },
+  { name: 'Morgan Ito', email: 'morgan.ito@mail.com', status: 'paid', due: 0, behind: 0 },
+];
+
+const DUES_ROSTER = [
+  { name: 'Alex Moreau', owed: 50, paid: 50 },
+  { name: 'Sam Reyes', owed: 50, paid: 0 },
+  { name: 'Casey Lin', owed: 50, paid: 0 },
+  { name: 'Jordan Pike', owed: 50, paid: 50 },
+  { name: 'Riley Chen', owed: 0, paid: 0 },
+  { name: 'Morgan Ito', owed: 50, paid: 50 },
+];
+
+const CENTS = n => (n < 0 ? '-$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+class Component extends DCLogic {
+  state = {
+    screen: 'home',
+    activeAccount: 'checking',
+    drawerOpen: false,
+    txType: 'expense',
+    txDraft: null,
+    memberDrawerOpen: false,
+    memberDraft: null,
+    paymentDrawerOpen: false,
+    showUpdateNotice: true,
+    search: '',
+    unclearedOnly: false,
+    ledgerRows: LEDGER_ROWS,
+  };
+
+  setScreen(screen) { this.setState({ screen }); }
+  goDues = () => this.setState({ screen: 'dues' });
+  goLedgerFromHome = () => this.setState({ screen: 'ledger' });
+  dismissUpdate = () => this.setState({ showUpdateNotice: false });
+  setSearch = e => this.setState({ search: e.target.value });
+  toggleUnclearedOnly = () => this.setState(s => ({ unclearedOnly: !s.unclearedOnly }));
+  setActiveAccount(id) { this.setState({ activeAccount: id }); }
+
+  openNewTransaction = () => {
+    this.setState({ drawerOpen: true, txType: 'expense', txDraft: { date: '2026-07-09', payee: '', memo: '', amountStr: '$0.00', cleared: false } });
+  };
+  openRow = row => {
+    this.setState({
+      drawerOpen: true,
+      txType: row.amount >= 0 ? 'income' : 'expense',
+      txDraft: { date: '2026-07-09', payee: row.payee, memo: row.memo, amountStr: CENTS(row.amount), cleared: row.cleared },
+    });
+  };
+  closeDrawer = () => this.setState({ drawerOpen: false });
+  setTxType(t) { this.setState({ txType: t }); }
+  toggleCleared(account, idx) {
+    this.setState(s => {
+      const rows = s.ledgerRows[account].slice();
+      rows[idx] = { ...rows[idx], cleared: !rows[idx].cleared };
+      return { ledgerRows: { ...s.ledgerRows, [account]: rows } };
+    });
+  }
+
+  openMember = m => {
+    this.setState({
+      memberDrawerOpen: true,
+      memberDraft: {
+        name: m.name, email: m.email,
+        history: [
+          { period: 'Jul 2026', label: m.status === 'owed' ? 'Owed $50' : m.status === 'exempt' ? 'Exempt' : 'Paid', color: STATUS_COLOR[m.status] },
+          { period: 'Jun 2026', label: 'Paid', color: STATUS_COLOR.paid },
+          { period: 'May 2026', label: 'Paid', color: STATUS_COLOR.paid },
+        ],
+      },
+    });
+  };
+  closeMemberDrawer = () => this.setState({ memberDrawerOpen: false });
+  openPayment = () => this.setState({ paymentDrawerOpen: true });
+  closePayment = () => this.setState({ paymentDrawerOpen: false });
+
+  renderVals() {
+    const { screen, activeAccount, drawerOpen, txType, txDraft, memberDrawerOpen, memberDraft, paymentDrawerOpen, showUpdateNotice, search, unclearedOnly, ledgerRows } = this.state;
+    const recentBelowArrears = this.props.recentBelowArrears ?? true;
+    const healthOrder = recentBelowArrears ? 2 : 1;
+    const recentOrder = recentBelowArrears ? 1 : 2;
+
+    const navItems = NAV_ITEMS.map(label => {
+      const active = label.toLowerCase() === screen;
+      return {
+        label, active, onClick: () => this.setScreen(label.toLowerCase()),
+        fg: active ? '#fff' : '#3a4a3d',
+        bg: active ? '#2e7d46' : 'transparent',
+        hoverBg: active ? '#2e7d46' : '#eef2ec',
+        dotBg: active ? '#fff' : '#2e7d46',
+        dotOpacity: active ? 1 : 0.5,
+      };
+    });
+
+    const totalBalance = ACCOUNTS.reduce((s, a) => s + a.balance, 0);
+    const arrears = ARREARS.map(m => ({ name: m.name, amountStr: CENTS(m.amount), monthsLabel: m.months + ' mo behind' }));
+    const recentTx = RECENT_TX.map(tx => ({ ...tx, amountStr: CENTS(tx.amount), amountColor: tx.amount >= 0 ? '#2e7d46' : '#16281a' }));
+
+    const ledgerAccounts = ACCOUNTS.map(a => {
+      const active = a.id === activeAccount;
+      return {
+        ...a, balanceStr: CENTS(a.balance), active, onClick: () => this.setActiveAccount(a.id),
+        bg: active ? '#2e7d46' : '#fff',
+        shadow: active ? 'none' : '0 4px 14px rgba(20,60,30,.06)',
+        labelColor: active ? 'rgba(255,255,255,.75)' : '#8a938c',
+        balanceColor: active ? '#fff' : '#16281a',
+      };
+    });
+
+    let rows = ledgerRows[activeAccount] || [];
+    if (unclearedOnly) rows = rows.filter(r => !r.cleared);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      rows = rows.filter(r => r.payee.toLowerCase().includes(q) || (r.memo || '').toLowerCase().includes(q));
+    }
+    const visibleLedgerRows = rows.map((row, idx) => ({
+      ...row,
+      amountStr: CENTS(row.amount),
+      amountColor: row.amount >= 0 ? '#2e7d46' : '#16281a',
+      balanceStr: CENTS(row.balance),
+      onClick: () => this.openRow(row),
+      stopClick: e => e.stopPropagation(),
+      toggleCleared: () => this.toggleCleared(activeAccount, idx),
+    }));
+
+    const txTypes = ['Income', 'Expense', 'Transfer'].map(label => {
+      const active = label.toLowerCase() === txType;
+      return {
+        label, active, onClick: () => this.setTxType(label.toLowerCase()),
+        bg: active ? '#fff' : 'transparent',
+        shadow: active ? '0 1px 3px rgba(20,60,30,.12)' : 'none',
+      };
+    });
+
+    const members = MEMBERS.map(m => ({
+      name: m.name, email: m.email,
+      statusColor: STATUS_COLOR[m.status], statusLabel: STATUS_LABEL[m.status],
+      dueStr: m.due ? CENTS(m.due) : '—',
+      behindStr: m.behind ? m.behind + ' mo' : '—',
+      onClick: () => this.openMember(m),
+    }));
+
+    const duesRoster = DUES_ROSTER.map(d => {
+      const outstanding = d.owed - d.paid;
+      const status = outstanding <= 0 && d.owed > 0 ? 'paid' : outstanding <= 0 ? 'exempt' : 'owed';
+      return {
+        name: d.name, owedStr: CENTS(d.owed), paidStr: CENTS(d.paid), outstandingStr: CENTS(outstanding),
+        statusColor: STATUS_COLOR[status], statusLabel: STATUS_LABEL[status],
+      };
+    });
+
+    const stubTitles = { reports: 'Reports', settings: 'Settings' };
+
+    return {
+      healthOrder,
+      recentOrder,
+      navItems,
+      isHome: screen === 'home',
+      isLedger: screen === 'ledger',
+      isMembers: screen === 'members',
+      isDues: screen === 'dues',
+      isStub: screen === 'reports' || screen === 'settings',
+      stubTitle: stubTitles[screen] || '',
+      accounts: ACCOUNTS.map(a => ({ ...a, balanceStr: CENTS(a.balance) })),
+      totalBalanceStr: CENTS(totalBalance),
+      arrears,
+      showUpdateNotice,
+      goDues: this.goDues,
+      goLedgerFromHome: this.goLedgerFromHome,
+      dismissUpdate: this.dismissUpdate,
+      recentTx,
+      ledgerAccounts,
+      openNewTransaction: this.openNewTransaction,
+      search, setSearch: this.setSearch,
+      unclearedOnly, toggleUnclearedOnly: this.toggleUnclearedOnly,
+      visibleLedgerRows,
+      drawerOpen,
+      drawerTitle: txDraft && txDraft.payee ? 'Edit Transaction' : 'New Transaction',
+      closeDrawer: this.closeDrawer,
+      txTypes,
+      txDraft: txDraft || { date: '', payee: '', memo: '', amountStr: '$0.00', cleared: false },
+      members,
+      memberDrawerOpen,
+      memberDraft: memberDraft || { name: '', email: '', history: [] },
+      closeMemberDrawer: this.closeMemberDrawer,
+      duesRoster,
+      openPayment: this.openPayment,
+      paymentDrawerOpen,
+      closePayment: this.closePayment,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -133,11 +133,13 @@ export default function TxnDrawer({
   }
 
   return (
-    <div className="drawer">
+    <>
+      <div className="scrim" onClick={onClose} />
+      <div className="drawer">
       <div className="drawer-header">
-        <h2>{isEdit ? 'Edit transaction' : 'Add transaction'}</h2>
-        <button className="btn small" onClick={onClose}>
-          Close
+        <h2>{isEdit ? 'Edit transaction' : 'New transaction'}</h2>
+        <button className="drawer-close" onClick={onClose} aria-label="Close">
+          ×
         </button>
       </div>
 
@@ -145,8 +147,8 @@ export default function TxnDrawer({
         <div className="segmented">
           {(
             [
-              ['income', 'Money in'],
-              ['expense', 'Money out'],
+              ['income', 'Income'],
+              ['expense', 'Expense'],
               ['transfer', 'Transfer']
             ] as [TxnType, string][]
           ).map(([t, label]) => (
@@ -281,10 +283,16 @@ export default function TxnDrawer({
         ) : (
           <span />
         )}
-        <button className="btn primary" onClick={save} disabled={busy}>
-          {busy ? 'Saving…' : 'Save'}
-        </button>
+        <div className="btn-row">
+          <button className="btn" onClick={onClose} disabled={busy}>
+            Cancel
+          </button>
+          <button className="btn primary" onClick={save} disabled={busy}>
+            {busy ? 'Saving…' : 'Save'}
+          </button>
+        </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

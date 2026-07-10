@@ -106,8 +106,8 @@ export default function Settings({
                   ) : (
                     <>
                       {c.name}
-                      {c.isSystem && <span className="chip chip-na">built-in</span>}
-                      {!c.isActive && <span className="chip chip-na">inactive</span>}
+                      {c.isSystem && <span className="tag">built-in</span>}
+                      {!c.isActive && <span className="tag">inactive</span>}
                     </>
                   )}
                 </td>

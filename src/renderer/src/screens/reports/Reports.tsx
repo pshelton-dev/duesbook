@@ -136,6 +136,7 @@ export default function Reports({ org }: { org: OrganizationSummary }): React.JS
 
   return (
     <div>
+      <h1>Reports</h1>
       <div className="report-controls">
         <div className="segmented">
           {(
