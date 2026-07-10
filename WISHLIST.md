@@ -3,6 +3,14 @@
 Findings from the real-data pilot and deferred ideas. Not commitments —
 candidates, roughly ordered by how much pain they remove.
 
+## Shipped since this list was written
+
+- **UI redesign** (2026-07-10, commit `1207d21`): bento-card look, single-green
+  identity, dot statuses with separate Due/Behind columns, drawer scrim. All
+  six screens + drawers + the **first-run wizard** were restyled and verified.
+  Note: this was cosmetic only — item 1 below (the wizard's books-start-date
+  question) is a *functional* change and remains open.
+
 1. **Wizard: ask when the books should start.** (Pilot finding, 2026-07-08.)
    The wizard says "enter the balance from your most recent statement" but
    also lets you create a dues period that starts months earlier. Those two
