@@ -3,6 +3,7 @@ import type {
   CategoryKind,
   DuesbookApi,
   DuesPeriodInput,
+  ImportDecisions,
   MemberInput,
   NewTxn,
   RecordDuesPayment,
@@ -11,6 +12,7 @@ import type {
   WizardMember,
   WizardPayload
 } from '../shared/types'
+import type { NormalizedBankRow } from '../shared/bank-import'
 
 const api: DuesbookApi = {
   getStatus: () => ipcRenderer.invoke('app:get-status'),
@@ -68,7 +70,12 @@ const api: DuesbookApi = {
   getHomeSummary: () => ipcRenderer.invoke('home:summary'),
   checkForUpdate: () => ipcRenderer.invoke('update:check'),
   setArrearsThreshold: (periods: number) =>
-    ipcRenderer.invoke('org:set-arrears-threshold', periods)
+    ipcRenderer.invoke('org:set-arrears-threshold', periods),
+  openBankFile: () => ipcRenderer.invoke('import:open-file'),
+  previewBankImport: (accountId: number, rows: NormalizedBankRow[]) =>
+    ipcRenderer.invoke('import:preview', accountId, rows),
+  commitBankImport: (accountId: number, decisions: ImportDecisions) =>
+    ipcRenderer.invoke('import:commit', accountId, decisions)
 }
 
 contextBridge.exposeInMainWorld('duesbook', api)

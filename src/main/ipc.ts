@@ -1,8 +1,11 @@
 import { app, dialog, ipcMain } from 'electron'
 import type {
   AppStatus,
+  BankFileResult,
   CategoryKind,
   DuesPeriodInput,
+  ImportCommitResult,
+  ImportDecisions,
   MemberInput,
   NewTxn,
   RecordDuesPayment,
@@ -11,8 +14,11 @@ import type {
   WizardMember,
   WizardPayload
 } from '../shared/types'
-import { writeFileSync } from 'fs'
+import type { NormalizedBankRow } from '../shared/bank-import'
+import { readFileSync, writeFileSync } from 'fs'
+import { basename } from 'path'
 import * as backup from './backup'
+import * as bankImport from './import'
 import { getDbPath, getSchemaVersion, openDb } from './db'
 import * as dues from './dues'
 import { homeSummary } from './home'
@@ -175,4 +181,68 @@ export function registerIpc(): void {
     backup.restoreBackup(result.filePaths[0])
     return true
   })
+
+  /* ---------- Bank import (BANK-IMPORT-PLAN.md) ---------- */
+
+  ipcMain.handle('import:open-file', async (): Promise<BankFileResult | null> => {
+    const result = await dialog.showOpenDialog({
+      title: 'Import bank transactions',
+      filters: [
+        { name: 'Bank exports', extensions: ['csv', 'xlsx', 'ofx', 'qfx'] },
+        { name: 'All files', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    const path = result.filePaths[0]
+    const fileName = basename(path)
+    const ext = fileName.toLowerCase().split('.').pop()
+    if (ext === 'xlsx') {
+      return {
+        fileName,
+        format: 'xlsx',
+        grid: bankImport.readBankGridXlsx(new Uint8Array(readFileSync(path))),
+        rows: null
+      }
+    }
+    if (ext === 'ofx' || ext === 'qfx') {
+      throw new Error('OFX/QFX import is not supported yet — use CSV or Excel for now.')
+    }
+    return {
+      fileName,
+      format: 'csv',
+      grid: bankImport.readBankGridCsv(readFileSync(path, 'utf8')),
+      rows: null
+    }
+  })
+
+  ipcMain.handle('import:preview', (_e, accountId: number, rows: NormalizedBankRow[]) =>
+    bankImport.reconcileImport(openDb(), accountId, rows)
+  )
+
+  ipcMain.handle(
+    'import:commit',
+    async (_e, accountId: number, decisions: ImportDecisions): Promise<ImportCommitResult> => {
+      const db = openDb()
+      // Safety net promised in the plan: back up right before a bulk change.
+      // No backup folder configured = proceed (same risk posture as any other
+      // edit); a configured backup that FAILS aborts the import.
+      let backupPath: string | null = null
+      const org = db.prepare(`SELECT backup_dir FROM organization WHERE id = 1`).get() as
+        | { backup_dir: string | null }
+        | undefined
+      if (org?.backup_dir) {
+        try {
+          backupPath = await backup.backupNow(db)
+        } catch (err) {
+          throw new Error(
+            `Import cancelled — the pre-import backup failed (${err instanceof Error ? err.message : String(err)}). ` +
+              'Nothing was changed.'
+          )
+        }
+      }
+      const res = bankImport.commitImport(db, accountId, decisions)
+      return { ...res, backupPath }
+    }
+  )
 }

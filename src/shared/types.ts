@@ -294,6 +294,62 @@ export interface UpdateInfo {
   url: string
 }
 
+/* ---------- Bank import (see BANK-IMPORT-PLAN.md) ---------- */
+
+import type { BankGrid, NormalizedBankRow } from './bank-import'
+
+export type BankFileFormat = 'csv' | 'xlsx' | 'ofx'
+
+/** Result of the open-file dialog + parse; null when the dialog is cancelled. */
+export interface BankFileResult {
+  fileName: string
+  format: BankFileFormat
+  /** csv/xlsx: raw table for the mapping step. */
+  grid: BankGrid | null
+  /** ofx: rows arrive already normalized (no mapping step). Phase 3. */
+  rows: NormalizedBankRow[] | null
+}
+
+/** A row the engine will insert; fingerprint computed at reconcile time. */
+export interface ImportAddition {
+  row: NormalizedBankRow
+  fingerprint: string | null
+}
+
+export interface ImportDuplicate {
+  row: NormalizedBankRow
+  reason: 'fingerprint' | 'fitid' | 'cleared-match'
+  existingTxnId: number
+}
+
+/** Proposed reconcile: mark this existing uncleared txn cleared. */
+export interface ImportMatch {
+  row: NormalizedBankRow
+  fingerprint: string | null
+  existingTxnId: number
+  existingPayee: string | null
+  existingDate: string
+}
+
+export interface ImportPreview {
+  additions: ImportAddition[]
+  matches: ImportMatch[]
+  duplicates: ImportDuplicate[]
+}
+
+/** What the user accepted in the preview. */
+export interface ImportDecisions {
+  additions: ImportAddition[]
+  matches: { existingTxnId: number; fitid: string | null; fingerprint: string | null }[]
+}
+
+export interface ImportCommitResult {
+  added: number
+  markedCleared: number
+  /** Path of the pre-import backup, or null when no backup folder is configured. */
+  backupPath: string | null
+}
+
 export interface DuesbookApi {
   getStatus: () => Promise<AppStatus>
   chooseBackupDir: () => Promise<string | null>
@@ -344,4 +400,8 @@ export interface DuesbookApi {
   /** null = up to date, disabled, or offline (never an error) */
   checkForUpdate: () => Promise<UpdateInfo | null>
   setArrearsThreshold: (periods: number) => Promise<void>
+  /** file picker + parse; null if cancelled */
+  openBankFile: () => Promise<BankFileResult | null>
+  previewBankImport: (accountId: number, rows: NormalizedBankRow[]) => Promise<ImportPreview>
+  commitBankImport: (accountId: number, decisions: ImportDecisions) => Promise<ImportCommitResult>
 }

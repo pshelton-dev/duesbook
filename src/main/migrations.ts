@@ -124,5 +124,19 @@ export const migrations: string[] = [
   // 003 — arrears notification threshold (in dues periods, usually months)
   `
   ALTER TABLE organization ADD COLUMN arrears_threshold INTEGER NOT NULL DEFAULT 2;
+  `,
+  // 004 — bank import (BANK-IMPORT-PLAN.md): dedup stamps on txn, plus locked
+  // "Uncategorized" landing categories (the txn CHECK requires income/expense
+  // rows to have a category, so imported rows can't carry NULL).
+  `
+  ALTER TABLE txn ADD COLUMN import_fitid TEXT;
+  ALTER TABLE txn ADD COLUMN import_fingerprint TEXT;
+  CREATE INDEX idx_txn_import_fitid ON txn(account_id, import_fitid)
+    WHERE import_fitid IS NOT NULL;
+  CREATE INDEX idx_txn_import_fp ON txn(account_id, import_fingerprint)
+    WHERE import_fingerprint IS NOT NULL;
+  INSERT INTO category (name, kind, is_system, sort_order) VALUES
+    ('Uncategorized', 'income',  1, 98),
+    ('Uncategorized', 'expense', 1, 98);
   `
 ]
