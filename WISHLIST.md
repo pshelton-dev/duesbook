@@ -14,15 +14,16 @@ candidates, roughly ordered by how much pain they remove.
   File-based import (CSV, Excel, OFX/QFX) into the ledger, reconciliation-aware
   — re-imports and hand-entered entries never double-count. See
   BANK-IMPORT-PLAN.md. Live bank connections remain a permanent non-goal.
+- **Item 1 — wizard books-start-date** (2026-07-12, v1.3.0): the wizard now
+  asks when the books start; that one date anchors every opening balance and
+  pins the first dues period, making the double-count structurally impossible.
+  Settings gained account editing (opening balance/date) as the repair path
+  for existing books, and the period editor warns on periods that predate the
+  books. Also fixed en route: dues periods now auto-roll right after the
+  wizard and after restores, not just at launch.
 
-1. **Wizard: ask when the books should start.** (Pilot finding, 2026-07-08.)
-   The wizard says "enter the balance from your most recent statement" but
-   also lets you create a dues period that starts months earlier. Those two
-   choices silently conflict: recording historical dues payments then
-   double-counts money already inside the opening balance. The wizard should
-   ask "When do you want your books to start?" and align the opening-balance
-   as-of date with the first dues period — plus a hint explaining the
-   full-history vs. forward-only tradeoff.
+1. ~~**Wizard: ask when the books should start.**~~ Shipped in v1.3.0 — see
+   above.
 
 2. **First backup should run right after the wizard completes.** The launch
    auto-backup fires before a first-run wizard has set the backup folder, so
