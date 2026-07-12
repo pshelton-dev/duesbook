@@ -82,6 +82,9 @@ the entire application, and each release's installers are built from it in
 public by GitHub Actions. If you'd rather not run a prebuilt binary at all,
 build it yourself below.
 
+Once it's running, the **[Getting Started guide](docs/getting-started.md)**
+walks through the five-minute setup, step by step with screenshots.
+
 ## Building from source
 
 ```bash
