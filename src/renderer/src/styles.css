@@ -1035,6 +1035,10 @@ code {
   width: 480px;
 }
 
+.drawer.xwide {
+  width: 640px;
+}
+
 .drawer-header {
   display: flex;
   justify-content: space-between;

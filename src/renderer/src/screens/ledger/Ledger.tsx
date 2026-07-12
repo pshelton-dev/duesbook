@@ -6,6 +6,7 @@ import type {
   TxnRow
 } from '../../../../shared/types'
 import { formatCents } from '../../lib/money'
+import ImportDrawer from './ImportDrawer'
 import TxnDrawer from './TxnDrawer'
 
 const EMPTY_FILTERS: TxnFilters = {}
@@ -16,7 +17,7 @@ export default function Ledger(): React.JSX.Element {
   const [accountId, setAccountId] = useState<number | null>(null)
   const [txns, setTxns] = useState<TxnRow[]>([])
   const [filters, setFilters] = useState<TxnFilters>(EMPTY_FILTERS)
-  const [drawer, setDrawer] = useState<'closed' | 'new' | TxnRow>('closed')
+  const [drawer, setDrawer] = useState<'closed' | 'new' | 'import' | TxnRow>('closed')
   const [error, setError] = useState<string | null>(null)
 
   const filtersActive = Object.values(filters).some(
@@ -78,9 +79,14 @@ export default function Ledger(): React.JSX.Element {
               </button>
             ))}
         </div>
-        <button className="btn primary" onClick={() => setDrawer('new')}>
-          New transaction
-        </button>
+        <div className="btn-row">
+          <button className="btn" onClick={() => setDrawer('import')}>
+            Import…
+          </button>
+          <button className="btn primary" onClick={() => setDrawer('new')}>
+            New transaction
+          </button>
+        </div>
       </div>
 
       <div className="filter-bar">
@@ -191,7 +197,18 @@ export default function Ledger(): React.JSX.Element {
         </table>
       )}
 
-      {drawer !== 'closed' && (
+      {drawer === 'import' && (
+        <ImportDrawer
+          accountId={accountId}
+          accountName={account?.name ?? 'this account'}
+          onClose={() => setDrawer('closed')}
+          onSaved={async () => {
+            setDrawer('closed')
+            await refreshAll()
+          }}
+        />
+      )}
+      {drawer !== 'closed' && drawer !== 'import' && (
         <TxnDrawer
           accountId={accountId}
           accounts={accounts}
