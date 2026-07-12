@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import type { DuesPeriodInput, DuesPeriodRow } from '../../../../shared/types'
+import type { AccountSummary, DuesPeriodInput, DuesPeriodRow } from '../../../../shared/types'
 import { parseDollarsToCents } from '../../lib/money'
 
 export default function PeriodDrawer({
   editing,
   suggestion,
+  accounts,
   onSaved,
   onClose
 }: {
   editing: DuesPeriodRow | null
   suggestion: DuesPeriodInput | null
+  accounts: AccountSummary[]
   onSaved: () => void
   onClose: () => void
 }): React.JSX.Element {
@@ -22,6 +24,13 @@ export default function PeriodDrawer({
   )
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+
+  // Books-start guard: a period reaching back before every account opened
+  // overlaps money that's already inside the opening balances.
+  const booksStart = accounts
+    .filter((a) => a.isActive)
+    .reduce<string | null>((min, a) => (min === null || a.openingDate < min ? a.openingDate : min), null)
+  const predatesBooks = booksStart !== null && startDate !== '' && startDate < booksStart
 
   async function save(): Promise<void> {
     const cents = parseDollarsToCents(amount)
@@ -86,6 +95,15 @@ export default function PeriodDrawer({
           Changing the amount changes what every unpaid member owes for this period. Members with
           adjusted or waived dues keep their override.
         </p>
+      )}
+
+      {predatesBooks && (
+        <div className="panel warn">
+          This period starts before your books do ({booksStart}). Dues collected before then are
+          already inside the opening balance — recording payments for this period can
+          double-count them. To track older dues properly, first move the account opening date
+          back in Settings → Accounts.
+        </div>
       )}
 
       {error && <div className="panel error">{error}</div>}

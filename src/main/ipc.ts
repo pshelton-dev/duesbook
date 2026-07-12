@@ -1,5 +1,6 @@
 import { app, dialog, ipcMain } from 'electron'
 import type {
+  AccountUpdate,
   AppStatus,
   BankFileResult,
   CategoryKind,
@@ -73,10 +74,17 @@ export function registerIpc(): void {
   })
 
   ipcMain.handle('wizard:complete', (_event, payload: WizardPayload): void => {
-    completeWizard(openDb(), payload)
+    const db = openDb()
+    completeWizard(db, payload)
+    // Startup's auto-roll already ran (on an empty db) before the wizard
+    // finished — roll now so a backdated books-start owes every month since.
+    dues.ensurePeriodsCurrent(db)
   })
 
   ipcMain.handle('accounts:list', () => ledger.listAccounts(openDb()))
+  ipcMain.handle('accounts:update', (_e, id: number, input: AccountUpdate) =>
+    ledger.updateAccount(openDb(), id, input)
+  )
   ipcMain.handle('categories:list', () => ledger.listCategories(openDb()))
   ipcMain.handle('categories:create', (_e, name: string, kind: CategoryKind) =>
     ledger.createCategory(openDb(), name, kind)
@@ -151,7 +159,10 @@ export function registerIpc(): void {
   )
   ipcMain.handle('backup:now', () => backup.backupNow(openDb()))
   ipcMain.handle('backup:list', () => backup.listBackups(openDb()))
-  ipcMain.handle('backup:restore', (_e, path: string) => backup.restoreBackup(path))
+  ipcMain.handle('backup:restore', (_e, path: string) => {
+    backup.restoreBackup(path)
+    dues.ensurePeriodsCurrent(openDb()) // restored books may be months old
+  })
   ipcMain.handle('handoff:export', async (): Promise<string | null> => {
     const result = await dialog.showOpenDialog({
       title: 'Export for new treasurer',
@@ -179,6 +190,7 @@ export function registerIpc(): void {
     })
     if (result.canceled || result.filePaths.length === 0) return false
     backup.restoreBackup(result.filePaths[0])
+    dues.ensurePeriodsCurrent(openDb()) // restored books may be months old
     return true
   })
 

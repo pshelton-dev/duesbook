@@ -67,6 +67,14 @@ export interface AccountSummary {
   type: AccountType
   isActive: boolean
   balanceCents: number
+  openingBalanceCents: number
+  openingDate: string
+}
+
+export interface AccountUpdate {
+  name: string
+  openingBalanceCents: number
+  openingDate: string
 }
 
 export interface CategorySummary {
@@ -400,6 +408,7 @@ export interface DuesbookApi {
   /** null = up to date, disabled, or offline (never an error) */
   checkForUpdate: () => Promise<UpdateInfo | null>
   setArrearsThreshold: (periods: number) => Promise<void>
+  updateAccount: (id: number, input: AccountUpdate) => Promise<void>
   /** file picker + parse; null if cancelled */
   openBankFile: () => Promise<BankFileResult | null>
   previewBankImport: (accountId: number, rows: NormalizedBankRow[]) => Promise<ImportPreview>

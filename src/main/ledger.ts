@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3'
 import type {
   AccountSummary,
+  AccountUpdate,
   CategoryKind,
   CategorySummary,
   NewTxn,
@@ -18,21 +19,53 @@ function now(): string {
 export function listAccounts(db: Database.Database): AccountSummary[] {
   const rows = db
     .prepare(
-      `SELECT a.id, a.name, a.type, a.is_active,
+      `SELECT a.id, a.name, a.type, a.is_active, a.opening_balance_cents, a.opening_date,
               a.opening_balance_cents + COALESCE(SUM(t.amount_cents), 0) AS balance
        FROM account a
        LEFT JOIN txn t ON t.account_id = a.id
        GROUP BY a.id
        ORDER BY a.sort_order, a.id`
     )
-    .all() as { id: number; name: string; type: string; is_active: number; balance: number }[]
+    .all() as {
+    id: number
+    name: string
+    type: string
+    is_active: number
+    opening_balance_cents: number
+    opening_date: string
+    balance: number
+  }[]
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
     type: r.type as AccountSummary['type'],
     isActive: r.is_active === 1,
-    balanceCents: r.balance
+    balanceCents: r.balance,
+    openingBalanceCents: r.opening_balance_cents,
+    openingDate: r.opening_date
   }))
+}
+
+/** Settings-only edit: rename or restrike the opening balance/date. */
+export function updateAccount(db: Database.Database, id: number, input: AccountUpdate): void {
+  const name = input.name.trim()
+  if (!name) throw new Error('The account needs a name.')
+  if (!ISO_DATE.test(input.openingDate)) {
+    throw new Error('Set the date the opening balance is from.')
+  }
+  try {
+    const res = db
+      .prepare(
+        `UPDATE account SET name = ?, opening_balance_cents = ?, opening_date = ? WHERE id = ?`
+      )
+      .run(name, input.openingBalanceCents, input.openingDate, id)
+    if (res.changes === 0) throw new Error('Account not found.')
+  } catch (e) {
+    if (e instanceof Error && e.message.includes('UNIQUE')) {
+      throw new Error('Another account already has that name.')
+    }
+    throw e
+  }
 }
 
 export function listCategories(db: Database.Database): CategorySummary[] {

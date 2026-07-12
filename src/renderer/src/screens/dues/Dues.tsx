@@ -87,6 +87,7 @@ export default function Dues(): React.JSX.Element {
           <PeriodDrawer
             editing={drawer.editing}
             suggestion={drawer.suggestion}
+            accounts={accounts}
             onClose={() => setDrawer({ kind: 'closed' })}
             onSaved={async () => {
               setDrawer({ kind: 'closed' })
@@ -274,6 +275,7 @@ export default function Dues(): React.JSX.Element {
         <PeriodDrawer
           editing={drawer.editing}
           suggestion={drawer.suggestion}
+          accounts={accounts}
           onClose={() => setDrawer({ kind: 'closed' })}
           onSaved={async () => {
             setDrawer({ kind: 'closed' })

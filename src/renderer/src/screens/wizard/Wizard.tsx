@@ -14,6 +14,10 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
 
   const [orgName, setOrgName] = useState('')
   const [fyMonth, setFyMonth] = useState(1)
+  // One date rules them all: account opening balances are struck as of this
+  // date and the first dues period starts here — so money collected before
+  // the books began can never be double-counted (WISHLIST #1).
+  const [booksStart, setBooksStart] = useState(currentMonthPeriod().startDate)
   const [accounts, setAccounts] = useState<WizardAccount[]>([])
   const [backupDir, setBackupDir] = useState<string | null>(null)
   const [duesEnabled, setDuesEnabled] = useState(true)
@@ -26,12 +30,15 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
   const [members, setMembers] = useState<WizardMember[]>([])
 
   function validateStep(): string | null {
-    if (step === 0 && !orgName.trim()) return 'Give your organization a name.'
+    if (step === 0) {
+      if (!orgName.trim()) return 'Give your organization a name.'
+      if (!booksStart) return 'Set the date your books start.'
+    }
     if (step === 1 && accounts.length === 0) return 'Add at least one account.'
     if (step === 3 && duesEnabled) {
       if (!duesLabel.trim()) return 'The dues period needs a label.'
-      if (!duesStart || !duesEnd) return 'Set the dues period start and end dates.'
-      if (duesStart >= duesEnd) return 'The dues period must start before it ends.'
+      if (!duesEnd) return 'Set the dues period end date.'
+      if (duesStart >= duesEnd) return 'The dues period must end after it starts.'
       const cents = parseDollarsToCents(duesAmount)
       if (cents === null || cents < 0) return 'Enter a valid dues amount (like 50 or 49.50).'
     }
@@ -39,9 +46,13 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
   }
 
   function prefillDues(cadence: 'monthly' | 'yearly'): void {
-    const period = cadence === 'monthly' ? currentMonthPeriod() : currentFiscalPeriod(fyMonth)
+    // The first period is the month/fiscal-year CONTAINING the books-start
+    // date; its start is pinned to booksStart itself so the period can't
+    // reach back before the opening balances.
+    const anchor = new Date(`${booksStart}T12:00:00`)
+    const period = cadence === 'monthly' ? currentMonthPeriod(anchor) : currentFiscalPeriod(fyMonth, anchor)
     setDuesLabel(period.label)
-    setDuesStart(period.startDate)
+    setDuesStart(booksStart > period.startDate ? booksStart : period.startDate)
     setDuesEnd(period.endDate)
   }
 
@@ -74,7 +85,8 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
       orgName: orgName.trim(),
       fiscalYearStartMonth: fyMonth,
       backupDir,
-      accounts,
+      // Enforced: every opening balance is struck as of the books-start date.
+      accounts: accounts.map((a) => ({ ...a, openingDate: booksStart })),
       dues: duesEnabled
         ? {
             label: duesLabel.trim(),
@@ -143,6 +155,23 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
                 Many organizations run July to June; if yours follows the calendar year, leave
                 this on January. You can change it later in Settings.
               </p>
+              <label className="field">
+                Your books start on
+                <input
+                  type="date"
+                  value={booksStart}
+                  onChange={(e) => {
+                    setBooksStart(e.target.value)
+                    setDuesInitialized(false)
+                  }}
+                />
+              </label>
+              <p className="hint">
+                Balances and dues tracking begin on this date. Starting this month is easiest —
+                you only need each account&rsquo;s latest statement. Pick an earlier date to
+                bring in history: you&rsquo;ll enter each balance <em>as of that date</em>, then
+                add or import the transactions since.
+              </p>
               <p style={{ marginTop: 24 }}>
                 <button
                   className="btn small"
@@ -157,7 +186,9 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
             </>
           )}
 
-          {step === 1 && <StepAccounts accounts={accounts} onChange={setAccounts} />}
+          {step === 1 && (
+            <StepAccounts accounts={accounts} onChange={setAccounts} booksStart={booksStart} />
+          )}
 
           {step === 2 && (
             <>
@@ -227,11 +258,7 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
                   <div className="field-row">
                     <label className="field">
                       Period starts
-                      <input
-                        type="date"
-                        value={duesStart}
-                        onChange={(e) => setDuesStart(e.target.value)}
-                      />
+                      <input type="date" value={duesStart} disabled />
                     </label>
                     <label className="field">
                       Period ends
@@ -243,8 +270,10 @@ export default function Wizard({ onDone }: { onDone: () => void }): React.JSX.El
                     </label>
                   </div>
                   <p className="hint">
-                    Future periods are created automatically as months (or years) roll over.
-                    Individual waivers and prorated amounts can be set per member later.
+                    The first period starts when your books do ({duesStart}) — dues collected
+                    before then are already inside your opening balances. Future periods are
+                    created automatically as months (or years) roll over; waivers and prorated
+                    amounts can be set per member later.
                   </p>
                 </>
               )}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { AccountType, WizardAccount } from '../../../../shared/types'
-import { formatCents, parseDollarsToCents, todayIso } from '../../lib/money'
+import { formatCents, parseDollarsToCents } from '../../lib/money'
 
 const TYPE_LABELS: Record<AccountType, string> = {
   checking: 'Checking',
@@ -11,15 +11,16 @@ const TYPE_LABELS: Record<AccountType, string> = {
 
 export default function StepAccounts({
   accounts,
-  onChange
+  onChange,
+  booksStart
 }: {
   accounts: WizardAccount[]
   onChange: (accounts: WizardAccount[]) => void
+  booksStart: string
 }): React.JSX.Element {
   const [name, setName] = useState('')
   const [type, setType] = useState<AccountType>('checking')
   const [balance, setBalance] = useState('')
-  const [date, setDate] = useState(todayIso())
   const [error, setError] = useState<string | null>(null)
 
   function add(): void {
@@ -37,11 +38,10 @@ export default function StepAccounts({
       setError('Enter the balance as a number, like 1250.75.')
       return
     }
-    if (!date) {
-      setError('Set the date the balance is from.')
-      return
-    }
-    onChange([...accounts, { name: trimmed, type, openingBalanceCents: cents, openingDate: date }])
+    onChange([
+      ...accounts,
+      { name: trimmed, type, openingBalanceCents: cents, openingDate: booksStart }
+    ])
     setName('')
     setBalance('')
     setError(null)
@@ -52,7 +52,8 @@ export default function StepAccounts({
       <h1>Accounts</h1>
       <p className="lead">
         Add each place your organization keeps money — usually a checking account, maybe savings
-        or a cash box. Enter the balance from your most recent statement and the statement date.
+        or a cash box. Enter each balance <strong>as of {booksStart}</strong>, when your books
+        start — use the statement closest to that date.
       </p>
 
       {accounts.length > 0 && (
@@ -61,8 +62,7 @@ export default function StepAccounts({
             <tr>
               <th>Account</th>
               <th>Type</th>
-              <th className="num">Opening balance</th>
-              <th>As of</th>
+              <th className="num">Balance as of {booksStart}</th>
               <th></th>
             </tr>
           </thead>
@@ -72,7 +72,6 @@ export default function StepAccounts({
                 <td>{a.name}</td>
                 <td>{TYPE_LABELS[a.type]}</td>
                 <td className="num">{formatCents(a.openingBalanceCents)}</td>
-                <td>{a.openingDate}</td>
                 <td>
                   <button
                     className="btn small"
@@ -114,10 +113,6 @@ export default function StepAccounts({
             placeholder="0.00"
             inputMode="decimal"
           />
-        </label>
-        <label className="field">
-          As of
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <button className="btn" onClick={add}>
           Add account

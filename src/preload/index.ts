@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type {
+  AccountUpdate,
   CategoryKind,
   DuesbookApi,
   DuesPeriodInput,
@@ -71,6 +72,8 @@ const api: DuesbookApi = {
   checkForUpdate: () => ipcRenderer.invoke('update:check'),
   setArrearsThreshold: (periods: number) =>
     ipcRenderer.invoke('org:set-arrears-threshold', periods),
+  updateAccount: (id: number, input: AccountUpdate) =>
+    ipcRenderer.invoke('accounts:update', id, input),
   openBankFile: () => ipcRenderer.invoke('import:open-file'),
   previewBankImport: (accountId: number, rows: NormalizedBankRow[]) =>
     ipcRenderer.invoke('import:preview', accountId, rows),

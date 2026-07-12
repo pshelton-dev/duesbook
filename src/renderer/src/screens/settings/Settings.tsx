@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { AppStatus, BackupFile, CategorySummary } from '../../../../shared/types'
+import type {
+  AccountSummary,
+  AppStatus,
+  BackupFile,
+  CategorySummary
+} from '../../../../shared/types'
 import { MONTH_NAMES } from '../../lib/fiscal'
+import { formatCents } from '../../lib/money'
+import AccountDrawer from './AccountDrawer'
 
 function friendlyTime(iso: string | null): string {
   if (!iso) return 'never'
@@ -20,6 +27,8 @@ export default function Settings({
   const [retention, setRetention] = useState(String(org.backupRetention))
   const [arrears, setArrears] = useState(String(org.arrearsThreshold))
   const [categories, setCategories] = useState<CategorySummary[]>([])
+  const [accounts, setAccounts] = useState<AccountSummary[]>([])
+  const [editingAccount, setEditingAccount] = useState<AccountSummary | null>(null)
   const [editingCat, setEditingCat] = useState<{ id: number; name: string } | null>(null)
   const [backups, setBackups] = useState<BackupFile[] | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
@@ -30,9 +39,13 @@ export default function Settings({
     setCategories(await window.duesbook.listCategories())
   }, [])
 
+  const loadAccounts = useCallback(async () => {
+    setAccounts(await window.duesbook.listAccounts())
+  }, [])
+
   useEffect(() => {
-    loadCategories().catch((e) => setError(String(e)))
-  }, [loadCategories])
+    Promise.all([loadCategories(), loadAccounts()]).catch((e) => setError(String(e)))
+  }, [loadCategories, loadAccounts])
 
   async function run(action: () => Promise<void>, successNotice?: string): Promise<void> {
     setBusy(true)
@@ -88,6 +101,41 @@ export default function Settings({
         >
           Save
         </button>
+      </div>
+
+      <h2>Accounts</h2>
+      <div className="panel">
+        <table className="mini-table">
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th className="num">Opening balance</th>
+              <th>As of</th>
+              <th className="num">Balance today</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((a) => (
+              <tr key={a.id} className={a.isActive ? '' : 'inactive-row'}>
+                <td className="strong">{a.name}</td>
+                <td className="num">{formatCents(a.openingBalanceCents)}</td>
+                <td className="date">{a.openingDate}</td>
+                <td className="num">{formatCents(a.balanceCents)}</td>
+                <td className="row-actions">
+                  <button className="btn small" onClick={() => setEditingAccount(a)}>
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="hint">
+          The opening balance is where each account&rsquo;s books begin. Editing it here is how
+          you bring in older history: move the &ldquo;as of&rdquo; date back, use that older
+          statement&rsquo;s balance, then add or import the transactions since.
+        </p>
       </div>
 
       <h2>Categories</h2>
@@ -344,6 +392,19 @@ export default function Settings({
         <div>Data file: {status.dbPath}</div>
         <div>Schema version: {status.schemaVersion}</div>
       </div>
+
+      {editingAccount && (
+        <AccountDrawer
+          account={editingAccount}
+          onClose={() => setEditingAccount(null)}
+          onSaved={async () => {
+            setEditingAccount(null)
+            setNotice('Account updated.')
+            await loadAccounts()
+            onChanged()
+          }}
+        />
+      )}
     </div>
   )
 }
