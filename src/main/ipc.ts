@@ -206,7 +206,13 @@ export function registerIpc(): void {
       }
     }
     if (ext === 'ofx' || ext === 'qfx') {
-      throw new Error('OFX/QFX import is not supported yet — use CSV or Excel for now.')
+      const rows = bankImport.parseOfx(readFileSync(path, 'utf8'))
+      if (rows.length === 0) {
+        throw new Error(
+          'No transactions found in that OFX file — it may be a request file or empty statement.'
+        )
+      }
+      return { fileName, format: 'ofx', grid: null, rows }
     }
     return {
       fileName,

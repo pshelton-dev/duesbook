@@ -118,6 +118,24 @@ CREATE INDEX idx_txn_import ON txn(account_id, import_fitid, import_fingerprint)
   same grid: import → re-import = 0 added; uncleared hand-entered txn →
   matched & marked cleared; cleared hand-entered txn → skipped as duplicate.
 
+## Implementation notes (phase 3, built 2026-07-11)
+
+- `parseOfx` handles OFX 1.x (SGML, unclosed leaf tags, colon-style header)
+  and 2.x (XML) in one pass; DTPOSTED time/zone suffixes dropped; description
+  = NAME → MEMO → "TRNTYPE CHECKNUM" fallback. OFX rows skip the mapping step
+  in the UI (already structured).
+- **Cross-source dedup fix:** the amount+date candidate net now includes
+  import-stamped transactions, so the same money arriving from a different
+  source (CSV one month, QFX the next; a bank that re-issues FITIDs) is caught
+  as a `cleared-match` duplicate instead of silently re-added. Trade-off: a
+  genuinely-new identical twin row in an overlapping download lands in the
+  visible duplicates bucket (recoverable by hand-entry) — chosen over silent
+  double-counting.
+- Verified against two public fixtures: annacruz/ofx `sample.ofx` (OFX 1.02
+  SGML, 36 txns, tz-stamped dates, mixed tag styles) and csingley/ofxtools
+  `stmtrs.ofx` (OFX 2.0 XML). Full CSV/XLSX suite re-run green after the
+  candidate-net change.
+
 ## Phases (build → walkthrough → commit loop)
 
 1. **Engine**: migration 004 + parsers (CSV, XLSX) + reconcile + commit + IPC.

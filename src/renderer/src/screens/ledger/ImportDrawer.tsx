@@ -76,6 +76,11 @@ export default function ImportDrawer({
     try {
       const file = await window.duesbook.openBankFile()
       if (!file) return
+      if (file.rows) {
+        // OFX/QFX arrives already normalized — no mapping step.
+        await toPreview(file.fileName, file.rows)
+        return
+      }
       if (!file.grid) {
         setError('That file type is not supported yet.')
         return
@@ -87,16 +92,15 @@ export default function ImportDrawer({
     }
   }
 
-  async function toPreview(): Promise<void> {
-    if (!mapped || step.kind !== 'map') return
+  async function toPreview(fileName: string, previewRows: NormalizedBankRow[]): Promise<void> {
     setBusy(true)
     setError(null)
     try {
-      const preview = await window.duesbook.previewBankImport(accountId, mapped.rows)
-      setRows(mapped.rows)
+      const preview = await window.duesbook.previewBankImport(accountId, previewRows)
+      setRows(previewRows)
       setCheckedAdds(new Set(preview.additions.map((_, i) => i)))
       setCheckedMatches(new Set(preview.matches.map((_, i) => i)))
-      setStep({ kind: 'preview', fileName: step.fileName, preview })
+      setStep({ kind: 'preview', fileName, preview })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
@@ -179,8 +183,8 @@ export default function ImportDrawer({
         {step.kind === 'pick' && (
           <>
             <p className="lead">
-              Choose a file downloaded from your bank — CSV or Excel. Duesbook matches it
-              against this account so nothing is counted twice.
+              Choose a file downloaded from your bank — CSV, Excel, or OFX/QFX (“download to
+              Quicken”). Duesbook matches it against this account so nothing is counted twice.
             </p>
             <div className="btn-row">
               <button className="btn primary" onClick={pickFile}>
@@ -415,7 +419,7 @@ export default function ImportDrawer({
                 {step.kind === 'map' && (
                   <button
                     className="btn primary"
-                    onClick={toPreview}
+                    onClick={() => mapped && toPreview(step.fileName, mapped.rows)}
                     disabled={busy || !mapped || mapped.rows.length === 0}
                   >
                     {busy ? 'Checking…' : 'Continue'}

@@ -154,6 +154,66 @@ export function readBankGridXlsx(data: Uint8Array): BankGrid {
   return { headers: headers.map((h) => h.trim()), rows: dataRows }
 }
 
+/* ---------------- OFX / QFX ---------------- */
+
+/** First value of a leaf tag inside an SGML/XML OFX block. */
+function ofxField(block: string, tag: string): string | null {
+  const m = new RegExp(`<${tag}>([^<\\r\\n]*)`).exec(block)
+  const v = m ? decodeXml(m[1]).trim() : ''
+  return v || null
+}
+
+/** "20091019120000[-3:BRT]" | "20051004" → ISO date (time/zone dropped). */
+function ofxDateToIso(raw: string): string | null {
+  const m = /^(\d{4})(\d{2})(\d{2})/.exec(raw.trim())
+  if (!m) return null
+  const [, y, mo, d] = m
+  if (Number(mo) < 1 || Number(mo) > 12 || Number(d) < 1 || Number(d) > 31) return null
+  return `${y}-${mo}-${d}`
+}
+
+/** OFX TRNAMT (dot decimal per spec; lone-comma decimals tolerated) → cents. */
+function ofxAmountToCents(raw: string): number | null {
+  let s = raw.trim()
+  if (!s.includes('.') && (s.match(/,/g) ?? []).length === 1) s = s.replace(',', '.')
+  if (!/^[+-]?\d+(\.\d+)?$/.test(s)) return null
+  return Math.round(Number(s) * 100)
+}
+
+/**
+ * OFX 1.x (SGML, unclosed leaf tags) and 2.x (XML) statement files → rows.
+ * Only <STMTTRN> blocks matter; the header (colon-style or XML prolog) and
+ * everything outside the transaction list is ignored.
+ */
+export function parseOfx(text: string): NormalizedBankRow[] {
+  const body = text.slice(Math.max(text.indexOf('<OFX>'), 0))
+  const rows: NormalizedBankRow[] = []
+  const blockRe = /<STMTTRN>([\s\S]*?)(?=<\/STMTTRN>|<STMTTRN>|<\/BANKTRANLIST>)/g
+  let m: RegExpExecArray | null
+  while ((m = blockRe.exec(body))) {
+    const block = m[1]
+    const date = ofxDateToIso(ofxField(block, 'DTPOSTED') ?? '')
+    const amountCents = ofxAmountToCents(ofxField(block, 'TRNAMT') ?? '')
+    if (!date || amountCents === null || amountCents === 0) continue
+
+    const name = ofxField(block, 'NAME')
+    const memo = ofxField(block, 'MEMO')
+    const fallback = [ofxField(block, 'TRNTYPE'), ofxField(block, 'CHECKNUM')]
+      .filter(Boolean)
+      .join(' ')
+    const description = normalizeDescription(name ?? memo ?? fallback) || 'Bank transaction'
+
+    rows.push({
+      date,
+      amountCents,
+      description,
+      memo: memo && memo !== description ? normalizeDescription(memo) : null,
+      fitid: ofxField(block, 'FITID')
+    })
+  }
+  return rows
+}
+
 /* ---------------- Reconcile ---------------- */
 
 interface TxnLite {
@@ -237,13 +297,15 @@ export function reconcileImport(
       continue
     }
 
-    // 2. Amount+date candidates that aren't import-stamped.
+    // 2. Amount+date candidates — including import-stamped ones, so the same
+    // money arriving from a different source (CSV one month, QFX the next;
+    // a bank that re-issues FITIDs) is caught as a duplicate instead of
+    // silently re-added. Cost: a genuinely-new identical twin row in an
+    // overlapping download lands in the visible duplicates bucket.
     const candidates = existing.filter(
       (t) =>
         !claimed.has(t.id) &&
         t.amount_cents === row.amountCents &&
-        !t.import_fitid &&
-        !t.import_fingerprint &&
         daysBetween(t.date, row.date) <= MATCH_WINDOW_DAYS
     )
     candidates.sort((a, b) => daysBetween(a.date, row.date) - daysBetween(b.date, row.date))
