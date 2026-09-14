@@ -5,6 +5,7 @@ import { createMember, deleteMember, getMemberDetail, updateMember } from '../sr
 import type { MemberInput } from '../src/shared/types'
 import { useBooks, useQuery } from '../src/ui/books'
 import { Button, DateField, ErrorText, TextField, Toggle } from '../src/ui/components'
+import { pickContactAsMember } from '../src/ui/contacts'
 import { todayIso } from '../src/ui/format'
 import { color } from '../src/ui/theme'
 
@@ -28,6 +29,15 @@ export default function MemberEdit(): React.JSX.Element {
     notes: existing?.notes ?? null
   }))
   const [error, setError] = useState<string | null>(null)
+  async function fromContacts(): Promise<void> {
+    try {
+      const c = await pickContactAsMember()
+      if (c) setForm({ ...form, firstName: c.firstName || form.firstName, lastName: c.lastName || form.lastName, email: c.email ?? form.email, phone: c.phone ?? form.phone, address: c.address ?? form.address })
+      setError(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
   const set = <K extends keyof MemberInput>(k: K, v: MemberInput[K]): void => setForm({ ...form, [k]: v })
   const text = (v: string | null): string => v ?? ''
   const orNull = (v: string): string | null => (v.trim() ? v : null)
@@ -61,6 +71,8 @@ export default function MemberEdit(): React.JSX.Element {
           <Text style={styles.title}>{memberId ? 'Edit member' : 'New member'}</Text>
           <Button title="Cancel" kind="link" onPress={() => router.back()} />
         </View>
+
+        {!memberId && <Button title="Add from Contacts" onPress={fromContacts} />}
 
         <View style={styles.twoUp}>
           <View style={{ flex: 1 }}>

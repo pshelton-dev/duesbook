@@ -27,7 +27,12 @@ export default function Members(): React.JSX.Element {
     <Screen>
       <Header
         title="Members"
-        right={<IconButton icon="plus" primary label="Add member" onPress={() => router.push('/member-edit')} />}
+        right={
+          <>
+            <IconButton icon="download" label="Import members" onPress={() => router.push('/import-members')} />
+            <IconButton icon="plus" primary label="Add member" onPress={() => router.push('/member-edit')} />
+          </>
+        }
       />
       <View style={styles.search}>
         <Feather name="search" size={16} color={color.muted} />

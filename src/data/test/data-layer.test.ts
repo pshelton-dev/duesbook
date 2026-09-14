@@ -25,6 +25,8 @@ import { completeWizard } from '../wizard'
 import { handoffFileName, looksLikeSqlite, snapshotDue, snapshotTo } from '../backup'
 import { getMeta } from '../meta'
 import { sha256Hex } from '../../shared/sha256'
+import { normalizeDate } from '../../shared/csv'
+import { applyMemberMapping, guessMemberMapping } from '../../shared/member-csv'
 import { applyMapping } from '../../shared/bank-import'
 
 let passed = 0
@@ -45,6 +47,23 @@ ok('matches node:crypto on 200 strings incl. unicode', () => {
   for (const s of samples) {
     assert.equal(sha256Hex(s), createHash('sha256').update(s).digest('hex'), `mismatch for ${JSON.stringify(s)}`)
   }
+})
+
+console.log('member spreadsheet')
+ok('dates and header guessing work without the host Date parser', () => {
+  assert.equal(normalizeDate('3/1/2024'), '2024-03-01')
+  assert.equal(normalizeDate('12-25-2025'), '2025-12-25')
+  assert.equal(normalizeDate('2025-06-15'), '2025-06-15')
+  assert.equal(normalizeDate('13/1/2024'), null)
+  assert.equal(normalizeDate(''), null)
+  const headers = ['Name', 'Email', 'Phone', 'Member since']
+  const map = guessMemberMapping(headers)
+  assert.deepEqual(map, { fullName: 0, email: 1, phone: 2, joinDate: 3 })
+  const members = applyMemberMapping([['Maria Alvarez', 'm@example.com', '614-555-0101', '3/1/2024'], ['Cher', '', '', ''], ['', '', '', '']], map)
+  assert.equal(members.length, 2)
+  assert.deepEqual(members[0], { firstName: 'Maria', lastName: 'Alvarez', email: 'm@example.com', phone: '614-555-0101', address: null, joinDate: '2024-03-01' })
+  assert.equal(members[1].lastName, 'Cher')
+  assert.equal(members[1].firstName, '')
 })
 
 /* ---------- 1. fresh file ---------- */

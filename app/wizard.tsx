@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ensurePeriodsCurrent } from '../src/data/dues'
@@ -8,6 +8,9 @@ import { currentFiscalPeriod, currentMonthPeriod, MONTH_NAMES } from '../src/sha
 import type { AccountType, WizardAccount } from '../src/shared/types'
 import { useBooks } from '../src/ui/books'
 import { pickBooksFile, snapshotNow } from '../src/ui/snapshots'
+import { pickContactAsMember } from '../src/ui/contacts'
+import { createMember, listMembers } from '../src/data/members'
+import { useRouter } from 'expo-router'
 import {
   AmountField,
   Button,
@@ -33,8 +36,21 @@ const ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
 
 /** First-run setup: one step per page, the books-start date anchoring everything. */
 export default function Wizard(): React.JSX.Element {
-  const { db, bump, restore } = useBooks()
+  const { db, bump, restore, version } = useBooks()
+  const router = useRouter()
   const [step, setStep] = useState(0)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const staged = useMemo(() => listMembers(db), [db, version])
+  async function fromContacts(): Promise<void> {
+    try {
+      const c = await pickContactAsMember()
+      if (!c) return
+      createMember(db, { ...c, leftDate: null, duesExempt: false, notes: null })
+      bump()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
   const [error, setError] = useState<string | null>(null)
 
   // 1 · organization
@@ -249,11 +265,30 @@ export default function Wizard(): React.JSX.Element {
           {step === 4 && (
             <>
               <Text style={styles.h1}>Who are your members?</Text>
-              <Text style={styles.lead}>Add people from the Members tab once setup is done, one at a time or from your Contacts. Anyone you add owes dues from the first period.</Text>
-              <View style={styles.infoBox}>
-                <View style={styles.infoDot} />
-                <Text style={[styles.body13, { flex: 1 }]}>Spreadsheet import is coming; for now the Members tab is the way in.</Text>
-              </View>
+              <Text style={styles.lead}>Bring the list in now, or add people one at a time later. Anyone on the list owes dues from the first period.</Text>
+              <Card>
+                <ListRow onPress={() => router.push('/import-members')}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.name}>Import a spreadsheet</Text>
+                    <Text style={styles.hint}>A CSV with names, and optionally email, phone, address, and join date.</Text>
+                  </View>
+                </ListRow>
+                <ListRow last onPress={fromContacts}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.name}>Pick from Contacts</Text>
+                    <Text style={styles.hint}>One person at a time. Duesbook asks for Contacts access only when you tap this.</Text>
+                  </View>
+                </ListRow>
+              </Card>
+              {staged.length > 0 && (
+                <View style={styles.infoBox}>
+                  <View style={styles.infoDot} />
+                  <Text style={[styles.body13, { flex: 1 }]}>
+                    {staged.length} member{staged.length === 1 ? '' : 's'} ready: {staged.slice(0, 4).map((m) => `${m.firstName} ${m.lastName}`.trim()).join(', ')}
+                    {staged.length > 4 ? ` and ${staged.length - 4} more` : ''}
+                  </Text>
+                </View>
+              )}
             </>
           )}
 

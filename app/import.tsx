@@ -140,7 +140,7 @@ export default function Import(): React.JSX.Element {
   const account = accounts.find((a) => a.id === accountId)
 
   return (
-    <View style={[styles.screen, { paddingTop: Math.max(insets.top, 12) }]}>
+    <View style={[styles.screen, { paddingTop: Math.min(insets.top, 12) }]}>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <View style={styles.head}>
           <Button title={stage === 'done' ? 'Done' : 'Cancel'} kind="link" onPress={() => router.back()} />

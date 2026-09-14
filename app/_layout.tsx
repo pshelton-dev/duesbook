@@ -11,6 +11,8 @@ function Routes(): React.JSX.Element {
   const { hasOrg } = useBooks()
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
+      {/* Reachable from the wizard too, so a new treasurer can bring the roster in on day one. */}
+      <Stack.Screen name="import-members" options={{ presentation: 'modal' }} />
       <Stack.Protected guard={hasOrg}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
