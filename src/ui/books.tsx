@@ -2,10 +2,10 @@ import { Directory, File } from 'expo-file-system'
 import { defaultDatabaseDirectory, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite'
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 import { wrapExpoDb } from '../data/adapters/expo-sqlite'
-import { snapshotStamp } from '../data/backup'
+import { copyTo, snapshotStamp } from '../data/backup'
 import { configure, migrate, type Db } from '../data/db'
 import { ensurePeriodsCurrent } from '../data/dues'
-import { maybeAutoSnapshot, snapshotDir } from './snapshots'
+import { maybeAutoSnapshot, pathOf, snapshotDir } from './snapshots'
 
 /**
  * Opens the books once for the whole app and hands out the connection.
@@ -33,7 +33,9 @@ interface Opened {
 }
 
 function open(): Opened {
-  const raw = openDatabaseSync(DB_NAME)
+  // A fresh connection every time: expo-sqlite caches handles by name, and a
+  // cached handle would keep reading the file a restore just replaced.
+  const raw = openDatabaseSync(DB_NAME, { useNewConnection: true })
   const db = wrapExpoDb(raw)
   configure(db)
   migrate(db)
@@ -63,8 +65,11 @@ export function BooksProvider({ children }: { children: ReactNode }): React.JSX.
   const restore = useCallback((file: File) => {
     const dir = dbDirectory()
     const live = new File(dir, DB_NAME)
-    // Safety copy of the current books next to the snapshots, as the desktop did.
-    if (live.exists) live.copySync(new File(snapshotDir(), `duesbook-pre-restore-${snapshotStamp()}.db`))
+    // Safety copy of the current books next to the snapshots, written by
+    // SQLite so it is consistent even with a WAL in flight.
+    const safety = new File(snapshotDir(), `duesbook-pre-restore-${snapshotStamp()}.db`)
+    if (safety.exists) safety.delete()
+    copyTo(openedRef.current.db, pathOf(safety.uri))
     openedRef.current.raw.closeSync()
     for (const suffix of ['-wal', '-shm']) {
       const side = new File(dir, `${DB_NAME}${suffix}`)
