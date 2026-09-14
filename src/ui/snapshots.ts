@@ -23,6 +23,9 @@ export function pathOf(uri: string): string {
   return decodeURI(uri.replace(/^file:\/\//, ''))
 }
 
+/** The YYYYMMDD-HHMMSS part of a snapshot name, so newest sorts first whatever the prefix. */
+const stampOf = (name: string): string => name.match(/(\d{8}-\d{6})/)?.[1] ?? ''
+
 export interface SnapshotFile {
   file: File
   name: string
@@ -40,7 +43,7 @@ export function listSnapshots(): SnapshotFile[] {
       sizeBytes: f.size,
       modifiedAt: f.modificationTime ? new Date(f.modificationTime).toISOString() : null
     }))
-    .sort((a, b) => b.name.localeCompare(a.name))
+    .sort((a, b) => stampOf(b.name).localeCompare(stampOf(a.name)))
 }
 
 /** Writes a new snapshot and prunes beyond the retention count. */

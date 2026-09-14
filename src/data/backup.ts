@@ -6,7 +6,8 @@ import { META, setMeta } from './meta'
  * itself (VACUUM INTO), safe even mid-WAL, exactly like the desktop's online
  * backup. Platform code decides where the file goes; this decides what it is.
  */
-export const SNAPSHOT_NAME = /^duesbook-backup-\d{8}-\d{6}\.db$/
+/** Timestamped snapshots, and the safety copies a restore leaves behind. */
+export const SNAPSHOT_NAME = /^duesbook-(backup|pre-restore)-\d{8}-\d{6}\.db$/
 
 export function snapshotStamp(d = new Date()): string {
   const p = (n: number): string => String(n).padStart(2, '0')

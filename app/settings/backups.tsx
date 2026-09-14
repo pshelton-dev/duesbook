@@ -67,9 +67,12 @@ export default function Backups(): React.JSX.Element {
           snapshots.map((s: SnapshotFile) => (
             <ListRow key={s.name}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.name}>{s.modifiedAt ? fmtDate(s.modifiedAt.slice(0, 10), true) : s.name}</Text>
+                <Text style={styles.name}>
+                  {s.modifiedAt ? fmtDate(s.modifiedAt.slice(0, 10), true) : s.name}
+                  {s.name.includes('pre-restore') ? ' · before a restore' : ''}
+                </Text>
                 <Text style={styles.muted}>
-                  {s.name} · {Math.max(1, Math.round(s.sizeBytes / 1024))} KB
+                  {s.name.replace(/^duesbook-(backup|pre-restore)-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})\.db$/, '$5:$6:$7')} · {Math.max(1, Math.round(s.sizeBytes / 1024))} KB
                 </Text>
               </View>
               <Button title="Restore" small onPress={() => confirmRestore(`the copy from ${s.modifiedAt ? fmtDate(s.modifiedAt.slice(0, 10), true) : s.name}`, () => restore(s.file))} />
