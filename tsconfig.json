@@ -4,6 +4,6 @@
     "strict": true,
     "types": ["node"]
   },
-  "include": ["src", "App.tsx", "index.ts"],
+  "include": ["src", "app"],
   "exclude": ["node_modules", "design"]
 }
