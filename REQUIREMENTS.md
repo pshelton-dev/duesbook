@@ -160,13 +160,15 @@ Health warnings on Home follow the same amber/red staleness rules as v1.
   multi-org, non-USD currencies, app-level encryption (all as in v1)
 - Home-screen widgets, watch apps, phone landscape layouts
 
-## Mobile-native candidates (cheap, not committed)
-Things a phone makes easy that a desktop didn't. Decide during build, in
-this order of likely value:
-- **Add member from Contacts** — pick a contact, name/email/phone prefill.
-  Costs a Contacts permission prompt and a privacy-label entry.
+## Mobile-native additions in v2.0 (decided 2026-09-14)
+- **Add member from Contacts** — pick a contact; name, email, and phone
+  prefill. The Contacts permission is requested only when tapped, and the
+  privacy label says so.
 - **Tap-to-contact from a member's detail** — call, text, email via the OS.
   Free; no permission needed.
+
+## Mobile-native candidates (cheap, not committed)
+Decide during build, in this order of likely value:
 - **Dues reminder by text** — from a member who owes, open Messages with a
   prefilled "your dues of $X for July are outstanding". The treasurer sends
   it; the app sends nothing.
@@ -176,17 +178,22 @@ this order of likely value:
 ## Open items
 - [ ] Android snapshot-folder mechanism (Documents via Storage Access
       Framework vs. rely on Auto Backup alone) — confirm during build.
-- [ ] Whether v2.0 ships iOS first with Android following, or both together.
-      One codebase either way; this is a testing-bandwidth question.
-- [ ] Repo layout: `main` becomes the mobile app with the desktop preserved at
-      `v1.3.0` and a `desktop-final` branch, vs. a fresh repo. Recommendation:
-      same repo — the schema, migrations, and shared modules carry over and
-      keep their history.
 - [ ] README and docs rewrite for the phone (screenshots, store links,
-      "moving from the desktop app" section).
+      "moving from the desktop app" section). The README keeps pointing at
+      GitHub, which stays the public face while the working repo is private.
 
-## Resolved (2026-09-13)
-- Platforms, stack, desktop fate, and backup story decided in a structured
-  decision round; see "Locked decisions" above.
-- Application name stays **Duesbook**. App Store name availability to be
-  re-checked at first TestFlight upload.
+## Resolved
+- 2026-09-13: platforms, stack, desktop fate, and backup story decided in a
+  structured decision round; see "Locked decisions" above.
+- 2026-09-13: application name stays **Duesbook**. App Store name
+  availability to be re-checked at first TestFlight upload.
+- 2026-09-14: **repo layout** — same repo; `main` becomes the mobile app,
+  the desktop is preserved at tag `v1.3.0` and a `desktop-final` branch, and
+  the Electron toolchain leaves `main`. Schema, migrations, and shared
+  modules keep their history.
+- 2026-09-14: **ship order** — iOS first via TestFlight, Android follows
+  from the same codebase once there is a device or emulator pass.
+- 2026-09-14: **Add member from Contacts** is in v2.0 (see above).
+- 2026-09-14: build order — finish the mockups (wizard, bank import, member
+  detail, Settings, tablet layout) before any code, then port the data
+  layer, then screens.

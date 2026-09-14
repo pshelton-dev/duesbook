@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #f4f5f2; }
+    a { color: #2e7d46; } a:hover { color: #256339; }
+    .pip { height: 4px; border-radius: 2px; flex: 1; background: #dcecdf; }
+    .pip.on { background: #2e7d46; }
+    .sec { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; min-height: 46px; font-size: 14px; font-weight: 700; }
+    .row { display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-top: 1px solid #f0f2ee; min-height: 48px; }
+    .cb { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #dde3dc; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .cb.on { background: #2e7d46; border-color: #2e7d46; }
+    .l { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .payee { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .meta { font-size: 11px; color: #8a938c; }
+    .amt { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .chev { color: #8a938c; }
+  </style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #f4f5f2; position: relative; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #16281a; font-size: 14px;">
+
+  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 112px; overflow: hidden; padding: 54px 16px 0; display: flex; flex-direction: column; gap: 14px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="color: #6f7a72; font-size: 15px; font-weight: 600; min-height: 44px; display: flex; align-items: center;">Cancel</div>
+      <div style="font-size: 15px; font-weight: 700;">Import from bank file</div>
+      <div style="width: 52px;"></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; gap: 6px;"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div></div>
+      <div style="font-size: 11px; font-weight: 600; color: #8a938c;">Step 3 of 4 · Review</div>
+    </div>
+
+    <div style="background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20, 60, 30, 0.06); display: flex; flex-direction: column;">
+      <div class="sec"><span>New <span style="color: #8a938c; font-weight: 600;">· 38</span></span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+      <div class="row"><div class="cb on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></div><div class="l"><div class="payee">PARKS DEPT PLOT RENTAL</div><div class="meta">Sep 3 · Uncategorized</div></div><div class="amt">-$75.00</div></div>
+      <div class="row"><div class="cb on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></div><div class="l"><div class="payee">MOBILE DEPOSIT 0829</div><div class="meta">Aug 29 · Uncategorized</div></div><div class="amt" style="color: #2e7d46;">$120.00</div></div>
+      <div class="row"><div class="cb on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></div><div class="l"><div class="payee">OHIO EDISON</div><div class="meta">Aug 26 · Uncategorized</div></div><div class="amt">-$31.10</div></div>
+      <div class="row" style="justify-content: center; color: #8a938c; font-size: 12px; min-height: 44px;">35 more</div>
+    </div>
+
+    <div style="background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20, 60, 30, 0.06); display: flex; flex-direction: column;">
+      <div class="sec"><span>Possible duplicates <span style="color: #8a938c; font-weight: 600;">· 2</span></span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+      <div class="row" style="align-items: flex-start; padding-top: 12px; padding-bottom: 12px;"><div class="cb"></div><div class="l"><div class="payee">SUNRISE SEED CO 4471</div><div class="meta">Aug 28 · from file</div><div style="margin-top: 6px; background: #fff9e9; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; color: #8a6420; line-height: 1.4;">Looks like <strong>Sunrise Seed Co. · Aug 28 · -$42.83</strong>, entered by hand.</div></div><div class="amt">-$42.83</div></div>
+      <div class="row" style="justify-content: center; color: #8a938c; font-size: 12px; min-height: 44px;">1 more</div>
+    </div>
+
+    <div style="background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20, 60, 30, 0.06); display: flex; flex-direction: column;">
+      <div class="sec" style="color: #8a938c;"><span>Already recorded <span style="font-weight: 600;">· 1</span></span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></div>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: flex-start; padding: 0 4px; font-size: 12px; color: #6f7a72; line-height: 1.4;">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #2e7d46; margin-top: 4px; flex-shrink: 0;"></div>
+      <div>A copy of your books is saved to iCloud Drive before anything changes.</div>
+    </div>
+
+  </div>
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 34px; display: flex; gap: 10px;">
+    <div style="flex: 1; background: #fff; border: 1px solid #dde3dc; border-radius: 12px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600;">Back</div>
+    <div style="flex: 2; background: #2e7d46; color: #fff; border-radius: 12px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700;">Import 38 transactions</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

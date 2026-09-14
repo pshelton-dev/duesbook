@@ -5,14 +5,24 @@
     { "file": "RecordPayment.dc.html", "title": "Record payment (sheet)", "x": 960, "y": 0, "w": 390, "h": 844 },
     { "file": "Ledger.dc.html", "title": "Ledger", "x": 0, "y": 1000, "w": 390, "h": 844 },
     { "file": "Members.dc.html", "title": "Members", "x": 480, "y": 1000, "w": 390, "h": 844 },
-    { "file": "Reports.dc.html", "title": "Reports", "x": 960, "y": 1000, "w": 390, "h": 844 }
+    { "file": "Reports.dc.html", "title": "Reports", "x": 960, "y": 1000, "w": 390, "h": 844 },
+    { "file": "Wizard1.dc.html", "title": "Wizard 1 · Organization", "x": 0, "y": 2000, "w": 390, "h": 844 },
+    { "file": "Wizard3.dc.html", "title": "Wizard 3 · Backups", "x": 480, "y": 2000, "w": 390, "h": 844 },
+    { "file": "MemberDetail.dc.html", "title": "Member detail", "x": 960, "y": 2000, "w": 390, "h": 844 },
+    { "file": "ImportMap.dc.html", "title": "Bank import · Map columns", "x": 0, "y": 3000, "w": 390, "h": 844 },
+    { "file": "ImportReview.dc.html", "title": "Bank import · Review", "x": 480, "y": 3000, "w": 390, "h": 844 },
+    { "file": "Settings.dc.html", "title": "Settings", "x": 960, "y": 3000, "w": 390, "h": 844 },
+    { "file": "Tablet.dc.html", "title": "Tablet · Dues (list + detail)", "x": 0, "y": 4000, "w": 1024, "h": 768 }
   ],
   "annotations": [
     { "id": "meeting-flow", "x": 0, "y": -170, "w": 420, "text": "Meeting row: Home → Dues → Record payment.\nThe three meeting moments from SCREEN-MAP: who owes, Bob handed me a check, show the report." },
-    { "id": "q-home-button", "x": 0, "y": 880, "w": 390, "text": "Open question 1: the pinned Record a payment button breaks v1's no-data-entry-on-Home rule. Keep, or leave it to the Dues tab only?" },
-    { "id": "q-owes-default", "x": 480, "y": 880, "w": 390, "text": "Open question 2: Owes is preselected whenever anyone owes. Alternative: always open on All with owing members sorted first." },
-    { "id": "q-last-account", "x": 960, "y": 880, "w": 390, "text": "Open question 3: Into account remembers the last payment's account (Cash box here). Nothing to type in the common case; date defaults to today." },
-    { "id": "desk-row", "x": 0, "y": 1880, "w": 420, "text": "Desk row: Ledger, Members, Reports. Bank import and the member detail screen are not drawn yet." }
+    { "id": "decided-home", "x": 0, "y": 880, "w": 390, "text": "Decided 2026-09-14: Home keeps the pinned Record a payment button." },
+    { "id": "decided-owes", "x": 480, "y": 880, "w": 390, "text": "Decided 2026-09-14: the roster opens on Owes whenever anyone owes." },
+    { "id": "decided-account", "x": 960, "y": 880, "w": 390, "text": "Decided 2026-09-14: Into account remembers the last payment's account, app-wide." },
+    { "id": "desk-row", "x": 0, "y": 1880, "w": 420, "text": "Desk row: Ledger, Members, Reports. The sample org has two accounts, Checking and Cash box, at $10 a month." },
+    { "id": "setup-row", "x": 0, "y": 2880, "w": 420, "text": "Setup and detail: wizard steps 1 and 3 (the two that changed from desktop), and the member detail screen with tap-to-call, text, and email." },
+    { "id": "import-row", "x": 0, "y": 3880, "w": 420, "text": "Bank import as one question per page (decided 2026-09-14), the three-bucket review, and Settings behind Home's gear." },
+    { "id": "tablet-note", "x": 1100, "y": 4000, "w": 300, "text": "Tablet (iPad landscape, 1024×768): the desktop sidebar returns and Dues becomes list + detail. Same screens, same code, wider container." }
   ],
   "launch": { "view": "canvas" }
 }

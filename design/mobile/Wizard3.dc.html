@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #f4f5f2; }
+    a { color: #2e7d46; } a:hover { color: #256339; }
+    .pip { height: 4px; border-radius: 2px; flex: 1; background: #dcecdf; }
+    .pip.on { background: #2e7d46; }
+  </style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #f4f5f2; position: relative; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #16281a; font-size: 14px;">
+
+  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 54px 20px 34px; display: flex; flex-direction: column; gap: 18px;">
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; gap: 6px;"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div></div>
+      <div style="font-size: 11px; font-weight: 600; color: #8a938c;">Step 3 of 5 · Backups</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-size: 23px; font-weight: 700; letter-spacing: -0.3px;">Keep a copy of your books</div>
+      <div style="font-size: 14px; color: #6f7a72; line-height: 1.5;">Your books live only on this phone. If it's lost or replaced, so are they, unless there's a copy somewhere.</div>
+    </div>
+
+    <div style="background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(20, 60, 30, 0.06); display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; min-height: 60px;">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 15px; font-weight: 600;">Keep copies in iCloud Drive</div>
+          <div style="font-size: 12px; color: #8a938c;">A timestamped copy each day you use the app</div>
+        </div>
+        <div style="width: 51px; height: 31px; border-radius: 16px; background: #2e7d46; position: relative; flex-shrink: 0;"><div style="position: absolute; top: 2px; left: 22px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);"></div></div>
+      </div>
+      <div style="border-top: 1px solid #f0f2ee; padding: 12px 16px 14px; font-size: 13px; color: #3a4a3d; line-height: 1.5;">Copies go to <strong>your own iCloud Drive</strong>, in a Duesbook folder you can see in the Files app. That is the only place anything ever leaves this phone, and you can turn it off any time in Settings.</div>
+    </div>
+
+    <div style="background: #eef2ec; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #3a4a3d; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start;">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #2e7d46; margin-top: 6px; flex-shrink: 0;"></div>
+      <div>This phone's own backup covers Duesbook too, if iCloud Backup is on. The copies above are the extra insurance you can hand to the next treasurer.</div>
+    </div>
+
+    <div style="flex: 1;"></div>
+
+    <div style="background: #2e7d46; color: #fff; border-radius: 12px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700;">Next</div>
+    <div style="text-align: center; font-size: 13px; color: #6f7a72; min-height: 44px; display: flex; align-items: center; justify-content: center;">Skip for now</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

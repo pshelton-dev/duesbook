@@ -194,8 +194,9 @@ Same engine as v1; the mapping UI is rebuilt for a phone.
   tap-to-call / text / email; dues history by period (owed, paid,
   outstanding, status); linked transactions; Edit button → sheet.
 - **Add (+)** → sheet with the baseline fields (name, email, phone, address,
-  join date, notes), dues-exempt toggle, "mark as left". "Add from
-  Contacts" appears here if it ships (see REQUIREMENTS "candidates").
+  join date, notes), dues-exempt toggle, "mark as left". **Add from
+  Contacts** at the top of the sheet prefills name, email, and phone; the
+  Contacts permission is requested only when tapped.
 - **Overflow (…)**: Import from CSV… (document picker → the same one-
   question-per-page mapping pattern as bank import → preview → import).
 
@@ -275,16 +276,15 @@ cards; drawers become sheets; the sidebar's green active pill becomes the
 active tab tint. A mobile design canvas (the `design` skill) is the next
 artifact after this map is reviewed.
 
-## Open questions for review
+## Resolved (2026-09-14)
 
-1. Is a pinned **Record a payment** button on Home the right break from
-   "no data entry on Home", or should Home stay pure and the Dues tab carry
-   the button alone?
-2. Should the **Owes** filter be the Dues default whenever anyone owes, or
-   should the roster always open on All with owing members sorted first?
-3. Remembering the **last-used account** for payments: per-app, or per
-   period? (Per-app is simpler; a cash-box-at-meetings org and a
-   checks-by-mail org each get the right default after one use.)
-4. Bank-import mapping as one question per page vs. a single scrollable
-   form — the page-per-question version is more taps but less error-prone
-   on a phone. Worth mocking both.
+1. Home **keeps the pinned Record a payment button**. The break from v1's
+   "no data entry on Home" is deliberate: launch-to-payment in one tap.
+2. The Dues roster **opens on the Owes filter whenever anyone owes**; All
+   is one tap away.
+3. The payment sheet's account **remembers the last one used, app-wide**.
+   One payment into the cash box and every later meeting payment defaults
+   there.
+4. Bank-import mapping is **one question per page** with a sample value
+   from the file under each option. The single-form version is not mocked.
+5. **Add from Contacts** ships in 2.0 and appears in the Add-member sheet.
