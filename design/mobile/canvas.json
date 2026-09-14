@@ -1,0 +1,18 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Home", "x": 0, "y": 0, "w": 390, "h": 844 },
+    { "file": "Dues.dc.html", "title": "Dues", "x": 480, "y": 0, "w": 390, "h": 844 },
+    { "file": "RecordPayment.dc.html", "title": "Record payment (sheet)", "x": 960, "y": 0, "w": 390, "h": 844 },
+    { "file": "Ledger.dc.html", "title": "Ledger", "x": 0, "y": 1000, "w": 390, "h": 844 },
+    { "file": "Members.dc.html", "title": "Members", "x": 480, "y": 1000, "w": 390, "h": 844 },
+    { "file": "Reports.dc.html", "title": "Reports", "x": 960, "y": 1000, "w": 390, "h": 844 }
+  ],
+  "annotations": [
+    { "id": "meeting-flow", "x": 0, "y": -170, "w": 420, "text": "Meeting row: Home → Dues → Record payment.\nThe three meeting moments from SCREEN-MAP: who owes, Bob handed me a check, show the report." },
+    { "id": "q-home-button", "x": 0, "y": 880, "w": 390, "text": "Open question 1: the pinned Record a payment button breaks v1's no-data-entry-on-Home rule. Keep, or leave it to the Dues tab only?" },
+    { "id": "q-owes-default", "x": 480, "y": 880, "w": 390, "text": "Open question 2: Owes is preselected whenever anyone owes. Alternative: always open on All with owing members sorted first." },
+    { "id": "q-last-account", "x": 960, "y": 880, "w": 390, "text": "Open question 3: Into account remembers the last payment's account (Cash box here). Nothing to type in the common case; date defaults to today." },
+    { "id": "desk-row", "x": 0, "y": 1880, "w": 420, "text": "Desk row: Ledger, Members, Reports. Bank import and the member detail screen are not drawn yet." }
+  ],
+  "launch": { "view": "canvas" }
+}
