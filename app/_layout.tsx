@@ -21,6 +21,13 @@ function Routes(): React.JSX.Element {
           name="member-edit"
           options={{ presentation: 'formSheet', sheetAllowedDetents: [0.92], sheetGrabberVisible: true }}
         />
+        {(['txn-edit', 'account-edit', 'period-edit'] as const).map((name) => (
+          <Stack.Screen
+            key={name}
+            name={name}
+            options={{ presentation: 'formSheet', sheetAllowedDetents: [0.92], sheetGrabberVisible: true }}
+          />
+        ))}
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
       </Stack.Protected>
       <Stack.Protected guard={!hasOrg}>

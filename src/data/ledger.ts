@@ -195,7 +195,7 @@ function validateCommon(date: string, amountCents: number): void {
   }
 }
 
-export function createTxn(db: Db, p: NewTxn): void {
+export function createTxn(db: Db, p: NewTxn): number {
   validateCommon(p.date, p.amountCents)
   const ts = now()
   const insert = db.prepare(
@@ -210,7 +210,7 @@ export function createTxn(db: Db, p: NewTxn): void {
       throw new Error('A transfer needs two different accounts.')
     }
     const direction = p.transferDirection === 'in' ? 1 : -1
-    db.transaction(() => {
+    return db.transaction(() => {
       const here = insert.run(
         p.accountId, p.date, direction * p.amountCents, 'transfer',
         null, p.payee?.trim() || null, p.memo?.trim() || null,
@@ -224,17 +224,18 @@ export function createTxn(db: Db, p: NewTxn): void {
       db.prepare(`UPDATE txn SET transfer_peer_id = ? WHERE id = ?`).run(
         Number(there.lastInsertRowid), Number(here.lastInsertRowid)
       )
+      return Number(here.lastInsertRowid)
     })
-    return
   }
 
   if (!p.categoryId) throw new Error('Pick a category.')
   const sign = p.type === 'income' ? 1 : -1
-  insert.run(
+  const r = insert.run(
     p.accountId, p.date, sign * p.amountCents, p.type,
     p.categoryId, p.payee?.trim() || null, p.memo?.trim() || null,
     p.cleared ? 1 : 0, null, ts, ts
   )
+  return Number(r.lastInsertRowid)
 }
 
 interface TxnDbRow {
