@@ -6,12 +6,17 @@
     { "file": "Ledger.dc.html", "title": "Ledger", "x": 0, "y": 1000, "w": 390, "h": 844 },
     { "file": "Members.dc.html", "title": "Members", "x": 480, "y": 1000, "w": 390, "h": 844 },
     { "file": "Reports.dc.html", "title": "Reports", "x": 960, "y": 1000, "w": 390, "h": 844 },
+    { "file": "MemberDetail.dc.html", "title": "Member detail", "x": 1440, "y": 1000, "w": 390, "h": 844 },
     { "file": "Wizard1.dc.html", "title": "Wizard 1 · Organization", "x": 0, "y": 2000, "w": 390, "h": 844 },
-    { "file": "Wizard3.dc.html", "title": "Wizard 3 · Backups", "x": 480, "y": 2000, "w": 390, "h": 844 },
-    { "file": "MemberDetail.dc.html", "title": "Member detail", "x": 960, "y": 2000, "w": 390, "h": 844 },
+    { "file": "Wizard2.dc.html", "title": "Wizard 2 · Accounts", "x": 480, "y": 2000, "w": 390, "h": 844 },
+    { "file": "Wizard3.dc.html", "title": "Wizard 3 · Backups", "x": 960, "y": 2000, "w": 390, "h": 844 },
+    { "file": "Wizard4.dc.html", "title": "Wizard 4 · Dues", "x": 1440, "y": 2000, "w": 390, "h": 844 },
+    { "file": "Wizard5.dc.html", "title": "Wizard 5 · Members", "x": 1920, "y": 2000, "w": 390, "h": 844 },
     { "file": "ImportMap.dc.html", "title": "Bank import · Map columns", "x": 0, "y": 3000, "w": 390, "h": 844 },
     { "file": "ImportReview.dc.html", "title": "Bank import · Review", "x": 480, "y": 3000, "w": 390, "h": 844 },
     { "file": "Settings.dc.html", "title": "Settings", "x": 960, "y": 3000, "w": 390, "h": 844 },
+    { "file": "AddTxn.dc.html", "title": "New transaction (sheet)", "x": 1440, "y": 3000, "w": 390, "h": 844 },
+    { "file": "AddMember.dc.html", "title": "New member (sheet)", "x": 1920, "y": 3000, "w": 390, "h": 844 },
     { "file": "Tablet.dc.html", "title": "Tablet · Dues (list + detail)", "x": 0, "y": 4000, "w": 1024, "h": 768 }
   ],
   "annotations": [
@@ -19,10 +24,10 @@
     { "id": "decided-home", "x": 0, "y": 880, "w": 390, "text": "Decided 2026-09-14: Home keeps the pinned Record a payment button." },
     { "id": "decided-owes", "x": 480, "y": 880, "w": 390, "text": "Decided 2026-09-14: the roster opens on Owes whenever anyone owes." },
     { "id": "decided-account", "x": 960, "y": 880, "w": 390, "text": "Decided 2026-09-14: Into account remembers the last payment's account, app-wide." },
-    { "id": "desk-row", "x": 0, "y": 1880, "w": 420, "text": "Desk row: Ledger, Members, Reports. The sample org has two accounts, Checking and Cash box, at $10 a month." },
-    { "id": "setup-row", "x": 0, "y": 2880, "w": 420, "text": "Setup and detail: wizard steps 1 and 3 (the two that changed from desktop), and the member detail screen with tap-to-call, text, and email." },
-    { "id": "import-row", "x": 0, "y": 3880, "w": 420, "text": "Bank import as one question per page (decided 2026-09-14), the three-bucket review, and Settings behind Home's gear." },
-    { "id": "tablet-note", "x": 1100, "y": 4000, "w": 300, "text": "Tablet (iPad landscape, 1024×768): the desktop sidebar returns and Dues becomes list + detail. Same screens, same code, wider container." }
+    { "id": "desk-row", "x": 0, "y": 1880, "w": 420, "text": "Desk row: Ledger, Members, Reports, and the member detail screen. The sample org has two accounts, Checking and Cash box, at $10 a month." },
+    { "id": "wizard-row", "x": 0, "y": 2880, "w": 420, "text": "First run, all five steps. Steps 1 and 3 changed from desktop (books-start date; iCloud toggle replaces the folder picker). Step 5 offers Contacts alongside CSV." },
+    { "id": "import-row", "x": 0, "y": 3880, "w": 420, "text": "Bank import as one question per page (decided 2026-09-14), the three-bucket review, Settings behind Home's gear, and the two add sheets." },
+    { "id": "tablet-note", "x": 480, "y": 3880, "w": 420, "text": "Tablet (iPad landscape, 1024×768): the desktop sidebar returns and Dues becomes list + detail. Same screens, same code, wider container." }
   ],
   "launch": { "view": "canvas" }
 }

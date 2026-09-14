@@ -65,8 +65,9 @@ Same steps and rules as v1.3.0 except step 3.
    snapshot exists.
 4. **Dues** *(skippable)* — cadence, amount, first period prefilled from the
    books-start date.
-5. **Members** *(skippable)* — import a CSV via the document picker, or
-   "I'll add them later".
+5. **Members** *(skippable)* — import a CSV via the document picker, pick
+   people from Contacts (the same Add-from-Contacts path as the Members
+   screen; permission asked only when tapped), or "I'll add them later".
 
 The welcome page also offers **"Taking over from a previous treasurer? Open
 their file"** (document picker), and opening a `.duesbook` file from Files,
@@ -194,7 +195,8 @@ Same engine as v1; the mapping UI is rebuilt for a phone.
   tap-to-call / text / email; dues history by period (owed, paid,
   outstanding, status); linked transactions; Edit button → sheet.
 - **Add (+)** → sheet with the baseline fields (name, email, phone, address,
-  join date, notes), dues-exempt toggle, "mark as left". **Add from
+  join date, notes) and the dues-exempt toggle; the Edit sheet adds "mark as
+  left" and Delete (only when there is no payment history). **Add from
   Contacts** at the top of the sheet prefills name, email, and phone; the
   Contacts permission is requested only when tapped.
 - **Overflow (…)**: Import from CSV… (document picker → the same one-

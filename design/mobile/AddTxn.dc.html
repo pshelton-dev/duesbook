@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #f4f5f2; }
+    a { color: #2e7d46; } a:hover { color: #256339; }
+    .lbl { font-size: 11px; font-weight: 600; color: #8a938c; }
+    .fld { background: #fff; border: 1px solid #dde3dc; border-radius: 9px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; font-size: 15px; }
+    .seg { flex: 1; text-align: center; padding: 12px 0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #3a4a3d; }
+    .seg.on { background: #fff; color: #16281a; box-shadow: 0 1px 3px rgba(20, 60, 30, 0.12); }
+  </style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #f4f5f2; position: relative; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #16281a; font-size: 14px;">
+
+  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 54px 16px 0; display: flex; flex-direction: column; gap: 12px; opacity: 0.55;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 0 0 4px;">
+      <div style="font-size: 23px; font-weight: 700; letter-spacing: -0.3px;">Ledger</div>
+    </div>
+    <div style="display: flex; border-radius: 10px; background: #eef2ec; padding: 3px;"><div class="seg on">Checking</div><div class="seg">Cash box</div></div>
+    <div style="background: #fff; border-radius: 14px; height: 200px;"></div>
+  </div>
+
+  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(22, 40, 26, 0.35);"></div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; background: #f4f5f2; border-radius: 22px 22px 0 0; box-shadow: 0 -8px 30px rgba(20, 60, 30, 0.18); padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="width: 36px; height: 5px; border-radius: 3px; background: #dde3dc; align-self: center;"></div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.3px;">New transaction</div>
+      <div style="font-size: 15px; font-weight: 600; color: #6f7a72; min-height: 44px; display: flex; align-items: center;">Cancel</div>
+    </div>
+
+    <div style="display: flex; border-radius: 10px; background: #eef2ec; padding: 3px;">
+      <div class="seg">Income</div><div class="seg on">Expense</div><div class="seg">Transfer</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="lbl">Amount</div>
+      <div class="fld" style="justify-content: flex-start; gap: 6px; min-height: 56px;"><span style="color: #8a938c; font-size: 20px;">$</span><span style="font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.3px;">23.40</span></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="lbl">Category</div>
+      <div class="fld"><span>Supplies</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6f7a72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="lbl">Paid to</div>
+      <div class="fld"><span>Ace Hardware</span></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="lbl">From account</div>
+        <div class="fld"><span>Checking</span></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="lbl">Date</div>
+        <div class="fld"><span>Today, Sep 14</span></div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="lbl">Memo</div>
+      <div class="fld" style="color: #8a938c;"><span>optional · check # or note</span></div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 4px;">
+      <div style="display: flex; flex-direction: column; gap: 2px;"><div style="font-size: 14px; font-weight: 600;">Cleared</div><div style="font-size: 11px; color: #8a938c;">Already on the bank statement</div></div>
+      <div style="width: 51px; height: 31px; border-radius: 16px; background: #dde3dc; position: relative; flex-shrink: 0;"><div style="position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);"></div></div>
+    </div>
+
+    <div style="background: #2e7d46; color: #fff; border-radius: 12px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700;">Save expense</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
