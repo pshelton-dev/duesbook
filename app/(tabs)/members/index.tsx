@@ -2,11 +2,11 @@ import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
-import { listMembers } from '../../src/data/members'
-import { useQuery } from '../../src/ui/books'
-import { Card, Chip, Header, IconButton, ListRow, Screen, StatusDot } from '../../src/ui/components'
-import { formatCents } from '../../src/ui/format'
-import { color } from '../../src/ui/theme'
+import { listMembers } from '../../../src/data/members'
+import { useQuery } from '../../../src/ui/books'
+import { Card, Chip, Header, IconButton, ListRow, Screen, StatusDot } from '../../../src/ui/components'
+import { formatCents } from '../../../src/ui/format'
+import { color } from '../../../src/ui/theme'
 
 export default function Members(): React.JSX.Element {
   const router = useRouter()
@@ -55,7 +55,7 @@ export default function Members(): React.JSX.Element {
           </ListRow>
         ) : (
           visible.map((m, i) => (
-            <ListRow key={m.id} last={i === visible.length - 1} onPress={() => router.push({ pathname: '/member-edit', params: { id: String(m.id) } })}>
+            <ListRow key={m.id} last={i === visible.length - 1} onPress={() => router.push({ pathname: '/members/[id]', params: { id: String(m.id) } })}>
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={styles.name}>
                   {m.lastName}

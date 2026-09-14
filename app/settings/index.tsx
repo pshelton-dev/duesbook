@@ -5,14 +5,16 @@ import { StyleSheet, Text, View } from 'react-native'
 import { listPeriods } from '../../src/data/dues'
 import { listAccounts, listCategories } from '../../src/data/ledger'
 import { META, getMeta } from '../../src/data/meta'
-import { useQuery } from '../../src/ui/books'
+import { useBooks, useQuery } from '../../src/ui/books'
 import { Button, Card, ListRow, Screen } from '../../src/ui/components'
+import { shareCopy } from '../../src/ui/snapshots'
 import { fmtDate, formatCents } from '../../src/ui/format'
 import { MONTH_NAMES } from '../../src/shared/fiscal'
 import { color } from '../../src/ui/theme'
 
 export default function SettingsHome(): React.JSX.Element {
   const router = useRouter()
+  const { db } = useBooks()
   const org = useQuery((db) =>
     db
       .prepare(`SELECT name, fiscal_year_start_month AS fy, arrears_threshold AS threshold FROM organization WHERE id = 1`)
@@ -59,8 +61,14 @@ export default function SettingsHome(): React.JSX.Element {
             sub={`${snapshots ? 'iCloud Drive copies on' : 'Copies off'} · ${lastBackup ? `last copy ${fmtDate(lastBackup.slice(0, 10), true)}` : 'no copy yet'}`}
             href="/settings/backups"
           />
-          <Row title="Handoff" sub="Export for the next treasurer · coming next" />
-          <Row title="Restore" sub="Open a copy or a handoff file · coming next" last />
+          <ListRow onPress={() => shareCopy(db, org?.name ?? 'organization', true).catch(() => undefined)}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title}>Handoff</Text>
+              <Text style={styles.sub}>Export for the next treasurer</Text>
+            </View>
+            <Feather name="share" size={16} color={color.muted} />
+          </ListRow>
+          <Row title="Restore" sub="Open a snapshot, a saved copy, or a handoff file" href="/settings/backups" last />
         </Card>
 
         <Text style={styles.cap}>About</Text>

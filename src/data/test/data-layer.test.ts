@@ -9,7 +9,7 @@
  */
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { copyFileSync, mkdtempSync, rmSync } from 'node:fs'
+import { copyFileSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openNodeDb } from '../adapters/node-sqlite'
@@ -22,6 +22,8 @@ import * as members from '../members'
 import { treasurerReport } from '../reports'
 import * as settings from '../settings'
 import { completeWizard } from '../wizard'
+import { handoffFileName, looksLikeSqlite, snapshotDue, snapshotTo } from '../backup'
+import { getMeta } from '../meta'
 import { sha256Hex } from '../../shared/sha256'
 import { applyMapping } from '../../shared/bank-import'
 
@@ -196,6 +198,25 @@ ok('bank import: reconcile, commit, re-import is a no-op', () => {
   assert.ok(txns.filter((t) => t.payee?.includes('Parks')).length === 2 || res.added >= 1)
   const fp = bank.fingerprintRow(checking.id, rows[0], 0)
   assert.equal(fp, createHash('sha256').update(`${checking.id}|${rows[0].date}|${rows[0].amountCents}|SUNRISE SEED CO 4471|0`).digest('hex'))
+})
+
+ok('snapshot via VACUUM INTO opens as a full copy', () => {
+  const target = join(dir, 'snap.db')
+  snapshotTo(fresh, target)
+  assert.ok(getMeta(fresh, 'last_backup_at'))
+  const head = readFileSync(target).subarray(0, 16)
+  assert.ok(looksLikeSqlite(head))
+  assert.ok(!looksLikeSqlite(new TextEncoder().encode('not a database file')))
+  const copy = openNodeDb(target)
+  assert.equal(getSchemaVersion(copy), 4)
+  assert.equal(members.listMembers(copy).length, 2)
+  assert.equal(ledger.listTxns(copy, checking.id, {}).length, ledger.listTxns(fresh, checking.id, {}).length)
+  copy.close()
+  assert.equal(snapshotDue(true, null), true)
+  assert.equal(snapshotDue(false, null), false)
+  assert.equal(snapshotDue(true, new Date(Date.now() - 3600e3).toISOString()), false)
+  assert.equal(snapshotDue(true, new Date(Date.now() - 25 * 3600e3).toISOString()), true)
+  assert.equal(handoffFileName('Riverside Garden Club', '2026-09-14'), 'Riverside-Garden-Club-duesbook-2026-09-14.duesbook')
 })
 
 fresh.close()

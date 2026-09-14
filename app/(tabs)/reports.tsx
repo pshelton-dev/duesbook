@@ -84,7 +84,7 @@ export default function Reports(): React.JSX.Element {
       const slug = kind === 'roster' ? `dues-roster-${period?.label ?? ''}` : `${kind === 'yearend' ? 'year-end' : 'treasurer-report'}-${range.from}-to-${range.to}`
       const named = new File(Paths.cache, `${slug.replace(/[^A-Za-z0-9-]+/g, '-')}.pdf`)
       if (named.exists) named.delete()
-      new File(uri).move(named)
+      new File(uri).moveSync(named)
       await Sharing.shareAsync(named.uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: title })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))

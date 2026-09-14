@@ -7,6 +7,7 @@ import { completeWizard } from '../src/data/wizard'
 import { currentFiscalPeriod, currentMonthPeriod, MONTH_NAMES } from '../src/shared/fiscal'
 import type { AccountType, WizardAccount } from '../src/shared/types'
 import { useBooks } from '../src/ui/books'
+import { pickBooksFile, snapshotNow } from '../src/ui/snapshots'
 import {
   AmountField,
   Button,
@@ -32,7 +33,7 @@ const ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
 
 /** First-run setup: one step per page, the books-start date anchoring everything. */
 export default function Wizard(): React.JSX.Element {
-  const { db, bump } = useBooks()
+  const { db, bump, restore } = useBooks()
   const [step, setStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
@@ -103,6 +104,13 @@ export default function Wizard(): React.JSX.Element {
       })
       setMeta(db, META.snapshotsEnabled, snapshots ? '1' : '0')
       ensurePeriodsCurrent(db)
+      if (snapshots) {
+        try {
+          snapshotNow(db)
+        } catch (e) {
+          console.warn('First snapshot failed:', e)
+        }
+      }
       bump()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -128,6 +136,17 @@ export default function Wizard(): React.JSX.Element {
             <>
               <Text style={styles.h1}>Let’s set up your books</Text>
               <Text style={styles.lead}>About five minutes. You can change any of this later in Settings.</Text>
+              <Button
+                title="Taking over from a previous treasurer? Open their file"
+                kind="link"
+                onPress={() =>
+                  pickBooksFile()
+                    .then((file) => {
+                      if (file) restore(file)
+                    })
+                    .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+                }
+              />
               <TextField label="Organization name" value={orgName} onChangeText={setOrgName} placeholder="Riverside Garden Club" autoFocus />
               <ChoiceField
                 label="Fiscal year starts in"

@@ -1,8 +1,11 @@
-import { openDatabaseSync } from 'expo-sqlite'
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { Directory, File } from 'expo-file-system'
+import { defaultDatabaseDirectory, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite'
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 import { wrapExpoDb } from '../data/adapters/expo-sqlite'
+import { snapshotStamp } from '../data/backup'
 import { configure, migrate, type Db } from '../data/db'
 import { ensurePeriodsCurrent } from '../data/dues'
+import { maybeAutoSnapshot, snapshotDir } from './snapshots'
 
 /**
  * Opens the books once for the whole app and hands out the connection.
@@ -16,30 +19,69 @@ interface Books {
   /** Call after any write so every screen re-reads. */
   bump: () => void
   hasOrg: boolean
+  /** Replace the live books with `file` (a snapshot or handoff), keeping a safety copy. */
+  restore: (file: File) => void
 }
 
 const BooksContext = createContext<Books | null>(null)
 
 export const DB_NAME = 'duesbook.db'
 
-function open(): Db {
-  const db = wrapExpoDb(openDatabaseSync(DB_NAME))
+interface Opened {
+  raw: SQLiteDatabase
+  db: Db
+}
+
+function open(): Opened {
+  const raw = openDatabaseSync(DB_NAME)
+  const db = wrapExpoDb(raw)
   configure(db)
   migrate(db)
-  ensurePeriodsCurrent(db)
-  return db
+  if (orgExists(db)) {
+    ensurePeriodsCurrent(db)
+    maybeAutoSnapshot(db)
+  }
+  return { raw, db }
 }
 
 function orgExists(db: Db): boolean {
   return db.prepare(`SELECT 1 FROM organization WHERE id = 1`).get() !== undefined
 }
 
+function dbDirectory(): Directory {
+  const p = String(defaultDatabaseDirectory)
+  return new Directory(p.startsWith('file:') ? p : `file://${p}`)
+}
+
 export function BooksProvider({ children }: { children: ReactNode }): React.JSX.Element {
-  const db = useMemo(open, [])
+  const [opened, setOpened] = useState<Opened>(open)
+  const openedRef = useRef(opened)
+  openedRef.current = opened
   const [version, setVersion] = useState(0)
   const bump = useCallback(() => setVersion((v) => v + 1), [])
-  const hasOrg = useMemo(() => orgExists(db), [db, version])
-  const value = useMemo(() => ({ db, version, bump, hasOrg }), [db, version, bump, hasOrg])
+
+  const restore = useCallback((file: File) => {
+    const dir = dbDirectory()
+    const live = new File(dir, DB_NAME)
+    // Safety copy of the current books next to the snapshots, as the desktop did.
+    if (live.exists) live.copySync(new File(snapshotDir(), `duesbook-pre-restore-${snapshotStamp()}.db`))
+    openedRef.current.raw.closeSync()
+    for (const suffix of ['-wal', '-shm']) {
+      const side = new File(dir, `${DB_NAME}${suffix}`)
+      if (side.exists) side.delete()
+    }
+    if (live.exists) live.delete()
+    file.copySync(live)
+    const next = open() // reopening runs migrations, so older files upgrade cleanly
+    setOpened(next)
+    setVersion((v) => v + 1)
+  }, [])
+
+  const hasOrg = useMemo(() => orgExists(opened.db), [opened, version])
+  const value = useMemo(
+    () => ({ db: opened.db, version, bump, hasOrg, restore }),
+    [opened, version, bump, hasOrg, restore]
+  )
   return <BooksContext.Provider value={value}>{children}</BooksContext.Provider>
 }
 
