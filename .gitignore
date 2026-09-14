@@ -1,8 +1,21 @@
 node_modules/
-out/
 dist/
 *.log
 .DS_Store
 *.local
 *.tsbuildinfo
 .claude/settings.local.json
+
+# Expo
+.expo/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+/ios
+/android
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.env*.local
