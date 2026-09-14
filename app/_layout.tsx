@@ -29,6 +29,7 @@ function Routes(): React.JSX.Element {
           />
         ))}
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="import" options={{ presentation: 'modal' }} />
       </Stack.Protected>
       <Stack.Protected guard={!hasOrg}>
         <Stack.Screen name="wizard" options={{ gestureEnabled: false }} />

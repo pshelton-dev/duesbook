@@ -44,12 +44,19 @@ export default function Ledger(): React.JSX.Element {
       <Header
         title="Ledger"
         right={
-          <IconButton
-            icon="plus"
-            primary
-            label="New transaction"
-            onPress={() => router.push({ pathname: '/txn-edit', params: accountId ? { accountId: String(accountId) } : {} })}
-          />
+          <>
+            <IconButton
+              icon="download"
+              label="Import from bank file"
+              onPress={() => router.push({ pathname: '/import', params: accountId ? { accountId: String(accountId) } : {} })}
+            />
+            <IconButton
+              icon="plus"
+              primary
+              label="New transaction"
+              onPress={() => router.push({ pathname: '/txn-edit', params: accountId ? { accountId: String(accountId) } : {} })}
+            />
+          </>
         }
       />
 
