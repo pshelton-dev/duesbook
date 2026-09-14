@@ -80,7 +80,12 @@ export default function Reports(): React.JSX.Element {
       const html = kind === 'roster' ? (roster && period ? rosterHtml(orgName, period.label, roster) : null) : report ? treasurerReportHtml(orgName, title, report) : null
       if (!html) return
       const { uri } = await Print.printToFileAsync({ html })
-      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: title })
+      // expo-print names the file with a UUID; give the share sheet a real name.
+      const slug = kind === 'roster' ? `dues-roster-${period?.label ?? ''}` : `${kind === 'yearend' ? 'year-end' : 'treasurer-report'}-${range.from}-to-${range.to}`
+      const named = new File(Paths.cache, `${slug.replace(/[^A-Za-z0-9-]+/g, '-')}.pdf`)
+      if (named.exists) named.delete()
+      new File(uri).move(named)
+      await Sharing.shareAsync(named.uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: title })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     }
