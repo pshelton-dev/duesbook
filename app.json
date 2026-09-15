@@ -9,6 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.duesbook.app",
+      "appleTeamId": "69DZ8J46ZN",
       "supportsTablet": true,
       "infoPlist": {
         "UIFileSharingEnabled": true,
