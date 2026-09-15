@@ -1,4 +1,4 @@
-import { Directory, File } from 'expo-file-system'
+import { Directory, File, Paths } from 'expo-file-system'
 import { defaultDatabaseDirectory, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite'
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 import { wrapExpoDb } from '../data/adapters/expo-sqlite'
@@ -33,9 +33,11 @@ interface Opened {
 }
 
 function open(): Opened {
+  const dir = dbDirectory()
+  adoptLegacyLocation(dir)
   // A fresh connection every time: expo-sqlite caches handles by name, and a
   // cached handle would keep reading the file a restore just replaced.
-  const raw = openDatabaseSync(DB_NAME, { useNewConnection: true })
+  const raw = openDatabaseSync(DB_NAME, { useNewConnection: true }, pathOf(dir.uri))
   const db = wrapExpoDb(raw)
   configure(db)
   migrate(db)
@@ -50,9 +52,34 @@ function orgExists(db: Db): boolean {
   return db.prepare(`SELECT 1 FROM organization WHERE id = 1`).get() !== undefined
 }
 
+/**
+ * The live database lives under Library/Application Support: backed up by
+ * the OS like Documents, but not shown in the Files app, where a stray tap
+ * could delete or move the working books. Only Documents/Snapshots is
+ * user-visible.
+ */
 function dbDirectory(): Directory {
+  // No spaces in this path: expo-file-system and expo-sqlite disagree about
+  // percent-encoding them, and "Application Support" produced two folders.
+  const dir = new Directory(Paths.document.uri.replace(/\/Documents\/?$/, '/Library/Duesbook/'))
+  if (!dir.exists) dir.create({ intermediates: true })
+  return dir
+}
+
+/** Books written by earlier builds into expo-sqlite's default Documents/SQLite folder move over once. */
+function adoptLegacyLocation(dir: Directory): void {
   const p = String(defaultDatabaseDirectory)
-  return new Directory(p.startsWith('file:') ? p : `file://${p}`)
+  const legacy = new Directory(p.startsWith('file:') ? p : `file://${p}`)
+  const old = new File(legacy, DB_NAME)
+  const target = new File(dir, DB_NAME)
+  if (old.exists && !target.exists) {
+    for (const suffix of ['', '-wal', '-shm']) {
+      const f = new File(legacy, `${DB_NAME}${suffix}`)
+      if (f.exists) f.moveSync(new File(dir, `${DB_NAME}${suffix}`))
+    }
+  }
+  // The empty default folder would otherwise still show under Documents in Files.
+  if (legacy.exists && legacy.list().length === 0) legacy.delete()
 }
 
 export function BooksProvider({ children }: { children: ReactNode }): React.JSX.Element {
