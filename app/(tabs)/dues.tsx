@@ -16,12 +16,16 @@ import {
   SummaryTile
 } from '../../src/ui/components'
 import { fmtDate, formatCents, formatDollars } from '../../src/ui/format'
+import { useIsWide } from '../../src/ui/layout'
+import { MemberDetailView } from '../../src/ui/screens/member-detail'
+import { EmptyDetail, Split } from '../../src/ui/split'
 import { color } from '../../src/ui/theme'
 
 type Filter = 'all' | 'owes' | 'paid'
 
 export default function Dues(): React.JSX.Element {
   const router = useRouter()
+  const wide = useIsWide()
   const periods = useQuery(listPeriods)
   const unallocated = useQuery(listUnallocated)
   const [chosenPeriod, setChosenPeriod] = useState<number | null>(null)
@@ -31,6 +35,7 @@ export default function Dues(): React.JSX.Element {
   const anyOwes = (roster?.rows ?? []).some((r) => r.outstandingCents > 0)
   const [chosenFilter, setChosenFilter] = useState<Filter | null>(null)
   const filter: Filter = chosenFilter ?? (anyOwes ? 'owes' : 'all')
+  const [chosenMember, setChosenMember] = useState<number | null>(null)
 
   const visible = useMemo(() => {
     const rows = roster?.rows ?? []
@@ -58,7 +63,14 @@ export default function Dues(): React.JSX.Element {
 
   const summary = roster?.summary
 
-  return (
+  // Tablet: a row selects the member for the detail pane instead of opening the payment sheet.
+  const selectedId = visible.some((r) => r.memberId === chosenMember) ? chosenMember : (visible[0]?.memberId ?? null)
+  const open = (memberId: number): void => {
+    if (wide) setChosenMember(memberId)
+    else router.push({ pathname: '/payment', params: { periodId: String(periodId), memberId: String(memberId) } })
+  }
+
+  const list = (
     <Screen>
       <Header title="Dues" />
       <ChoiceField
@@ -107,13 +119,7 @@ export default function Dues(): React.JSX.Element {
           </ListRow>
         ) : (
           visible.map((r, i) => (
-            <ListRow
-              key={r.memberId}
-              last={i === visible.length - 1}
-              onPress={() =>
-                router.push({ pathname: '/payment', params: { periodId: String(periodId), memberId: String(r.memberId) } })
-              }
-            >
+            <ListRow key={r.memberId} last={i === visible.length - 1} onPress={() => open(r.memberId)} style={wide && r.memberId === selectedId && styles.selected}>
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={styles.name}>
                   {r.lastName}
@@ -134,6 +140,14 @@ export default function Dues(): React.JSX.Element {
       <Button title="Record payment" kind="primary" onPress={() => router.push({ pathname: '/payment', params: { periodId: String(periodId) } })} />
     </Screen>
   )
+
+  if (!wide) return list
+  return (
+    <Split
+      list={list}
+      detail={selectedId === null ? <EmptyDetail text="Select a member to see their dues history." /> : <MemberDetailView key={selectedId} memberId={selectedId} embedded />}
+    />
+  )
 }
 
 const styles = StyleSheet.create({
@@ -141,6 +155,7 @@ const styles = StyleSheet.create({
   filterBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   chips: { flexDirection: 'row', gap: 6 },
   count: { fontSize: 12, color: color.muted },
+  selected: { backgroundColor: color.greenWash },
   name: { fontSize: 15, fontWeight: '600', color: color.ink },
   statusLine: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   note: { fontSize: 11, color: color.muted },

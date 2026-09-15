@@ -16,6 +16,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import type { DuesStatus } from '../shared/types'
+import { useIsWide } from './layout'
 import { color, radius, shadow, shadowStrong, statusColor, statusLabel } from './theme'
 
 /* ---------- layout ---------- */
@@ -30,7 +31,8 @@ export function Screen({
   /** space to leave for a pinned bar */
   bottomInset?: number
 }): React.JSX.Element {
-  const body = <View style={[styles.screenBody, { paddingBottom: 24 + bottomInset }]}>{children}</View>
+  const wide = useIsWide()
+  const body = <View style={[styles.screenBody, wide && styles.screenBodyWide, { paddingBottom: 24 + bottomInset }]}>{children}</View>
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       {scroll ? <ScrollView keyboardShouldPersistTaps="handled">{body}</ScrollView> : body}
@@ -461,6 +463,8 @@ export function ErrorText({ children }: { children: string }): React.JSX.Element
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
   screenBody: { paddingHorizontal: 16, paddingTop: 4, gap: 12 },
+  // tablets: a little more breathing room, and reading-width content on the single-pane screens
+  screenBodyWide: { paddingHorizontal: 20, maxWidth: 840 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 4, minHeight: 44 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   h1: { fontSize: 23, fontWeight: '700', color: color.ink, letterSpacing: -0.3, flexShrink: 1 },

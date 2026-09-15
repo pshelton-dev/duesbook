@@ -6,13 +6,18 @@ import { listMembers } from '../../../src/data/members'
 import { useQuery } from '../../../src/ui/books'
 import { Card, Chip, Header, IconButton, ListRow, Screen, StatusDot } from '../../../src/ui/components'
 import { formatCents } from '../../../src/ui/format'
+import { useIsWide } from '../../../src/ui/layout'
+import { MemberDetailView } from '../../../src/ui/screens/member-detail'
+import { EmptyDetail, Split } from '../../../src/ui/split'
 import { color } from '../../../src/ui/theme'
 
 export default function Members(): React.JSX.Element {
   const router = useRouter()
+  const wide = useIsWide()
   const members = useQuery(listMembers)
   const [search, setSearch] = useState('')
   const [former, setFormer] = useState(false)
+  const [chosen, setChosen] = useState<number | null>(null)
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -23,7 +28,14 @@ export default function Members(): React.JSX.Element {
     )
   }, [members, search, former])
 
-  return (
+  // Tablet: the selected member shows in the detail pane; the first visible one until a tap.
+  const selectedId = visible.some((m) => m.id === chosen) ? chosen : (visible[0]?.id ?? null)
+  const open = (id: number): void => {
+    if (wide) setChosen(id)
+    else router.push({ pathname: '/members/[id]', params: { id: String(id) } })
+  }
+
+  const list = (
     <Screen>
       <Header
         title="Members"
@@ -60,7 +72,7 @@ export default function Members(): React.JSX.Element {
           </ListRow>
         ) : (
           visible.map((m, i) => (
-            <ListRow key={m.id} last={i === visible.length - 1} onPress={() => router.push({ pathname: '/members/[id]', params: { id: String(m.id) } })}>
+            <ListRow key={m.id} last={i === visible.length - 1} onPress={() => open(m.id)} style={wide && m.id === selectedId && styles.selected}>
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={styles.name}>
                   {m.lastName}
@@ -77,12 +89,20 @@ export default function Members(): React.JSX.Element {
                   </Text>
                 )}
               </View>
-              <Feather name="chevron-right" size={16} color={color.inputBorder} />
+              {!wide && <Feather name="chevron-right" size={16} color={color.inputBorder} />}
             </ListRow>
           ))
         )}
       </Card>
     </Screen>
+  )
+
+  if (!wide) return list
+  return (
+    <Split
+      list={list}
+      detail={selectedId === null ? <EmptyDetail text="Select a member to see their contact details and dues history." /> : <MemberDetailView key={selectedId} memberId={selectedId} embedded />}
+    />
   )
 }
 
@@ -92,6 +112,7 @@ const styles = StyleSheet.create({
   filterBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   chips: { flexDirection: 'row', gap: 6 },
   count: { fontSize: 12, color: color.muted },
+  selected: { backgroundColor: color.greenWash },
   name: { fontSize: 15, fontWeight: '600', color: color.ink },
   right: { alignItems: 'flex-end', gap: 3 },
   due: { fontSize: 15, fontWeight: '700', color: color.ink, fontVariant: ['tabular-nums'] },

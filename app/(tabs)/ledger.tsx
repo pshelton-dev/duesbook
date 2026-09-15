@@ -6,10 +6,13 @@ import { listAccounts, listCategories, listTxns } from '../../src/data/ledger'
 import { useQuery } from '../../src/ui/books'
 import { Card, Chip, ChoiceField, DateField, Header, IconButton, ListRow, Screen, Segmented } from '../../src/ui/components'
 import { fmtDate, formatCents } from '../../src/ui/format'
+import { useIsWide } from '../../src/ui/layout'
+import { Split } from '../../src/ui/split'
 import { color } from '../../src/ui/theme'
 
 export default function Ledger(): React.JSX.Element {
   const router = useRouter()
+  const wide = useIsWide()
   const accounts = useQuery((db) => listAccounts(db).filter((a) => a.isActive))
   const categories = useQuery(listCategories)
   const [chosenAccount, setChosenAccount] = useState<number | null>(null)
@@ -39,8 +42,7 @@ export default function Ledger(): React.JSX.Element {
 
   const filtersOn = categoryId !== null || dateFrom !== '' || dateTo !== ''
 
-  return (
-    <Screen>
+  const header = (
       <Header
         title="Ledger"
         right={
@@ -59,22 +61,37 @@ export default function Ledger(): React.JSX.Element {
           </>
         }
       />
+  )
 
-      {accounts.length > 1 && (
-        <Segmented
-          options={accounts.map((a) => ({ value: String(a.id), label: a.name }))}
-          value={String(accountId)}
-          onChange={(v) => setChosenAccount(Number(v))}
-        />
-      )}
+  // Tablet: accounts as a list with balances; phone: the segmented control.
+  const accountPicker = wide ? (
+    <Card>
+      {accounts.map((a, i) => (
+        <ListRow key={a.id} last={i === accounts.length - 1} onPress={() => setChosenAccount(a.id)} style={a.id === accountId && styles.selected}>
+          <Text style={[styles.payee, { flex: 1 }]}>{a.name}</Text>
+          <Text style={styles.amt}>{formatCents(a.balanceCents)}</Text>
+        </ListRow>
+      ))}
+    </Card>
+  ) : (
+    accounts.length > 1 && (
+      <Segmented
+        options={accounts.map((a) => ({ value: String(a.id), label: a.name }))}
+        value={String(accountId)}
+        onChange={(v) => setChosenAccount(Number(v))}
+      />
+    )
+  )
 
-      {account && (
-        <View style={styles.balanceRow}>
-          <Text style={styles.balanceLabel}>{account.name} balance</Text>
-          <Text style={styles.balanceValue}>{formatCents(account.balanceCents)}</Text>
-        </View>
-      )}
+  const balance = account && (
+    <View style={styles.balanceRow}>
+      <Text style={styles.balanceLabel}>{account.name} balance</Text>
+      <Text style={styles.balanceValue}>{formatCents(account.balanceCents)}</Text>
+    </View>
+  )
 
+  const controls = (
+    <>
       <View style={styles.searchRow}>
         <View style={styles.search}>
           <Feather name="search" size={16} color={color.muted} />
@@ -116,7 +133,10 @@ export default function Ledger(): React.JSX.Element {
           )}
         </Card>
       )}
+    </>
+  )
 
+  const register = (
       <Card>
         {rows.length === 0 ? (
           <ListRow last>
@@ -147,7 +167,35 @@ export default function Ledger(): React.JSX.Element {
           ))
         )}
       </Card>
-    </Screen>
+  )
+
+  if (!wide) {
+    return (
+      <Screen>
+        {header}
+        {accountPicker}
+        {balance}
+        {controls}
+        {register}
+      </Screen>
+    )
+  }
+  return (
+    <Split
+      list={
+        <Screen>
+          {header}
+          {accountPicker}
+          {controls}
+        </Screen>
+      }
+      detail={
+        <Screen>
+          {balance}
+          {register}
+        </Screen>
+      }
+    />
   )
 }
 
@@ -168,5 +216,6 @@ const styles = StyleSheet.create({
   right: { alignItems: 'flex-end', gap: 3 },
   amt: { fontSize: 15, fontWeight: '600', color: color.ink, fontVariant: ['tabular-nums'] },
   running: { fontSize: 11, color: color.muted, fontVariant: ['tabular-nums'] },
+  selected: { backgroundColor: color.greenWash },
   empty: { fontSize: 14, color: color.muted }
 })

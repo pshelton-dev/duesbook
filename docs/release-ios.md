@@ -87,5 +87,6 @@ a headline on the brand green by `scripts/store-screenshots/compose-all.sh`.
 6. **Compose:** `scripts/store-screenshots/compose-all.sh` writes the
    finished PNGs to `build/store/out/`, numbered in store order.
 
-The iPad set uses the phone layout at full width; a true tablet layout is
-still on the list.
+On the iPad the app shows its tablet layout (sidebar, list + detail), so
+the same eight screens read differently there; `payment` and `member`
+come from the detail pane's buttons and the Members list.
