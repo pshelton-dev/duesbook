@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Duesbook">
+  <title>Duesbook mark (alpha mask)</title>
+  <!-- White mark on black: QuickLook cannot rasterise transparency, so this is
+       rendered as a luminance mask and colourised by design/mask-to-alpha.swift.
+       The mark stays inside the central 66% (Android adaptive-icon safe zone). -->
+  <defs>
+    <mask id="rules">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <rect x="318" y="446" width="130" height="24" rx="12" fill="#000"/>
+      <rect x="318" y="506" width="130" height="24" rx="12" fill="#000"/>
+      <rect x="318" y="566" width="130" height="24" rx="12" fill="#000"/>
+      <rect x="576" y="446" width="130" height="24" rx="12" fill="#000"/>
+      <rect x="576" y="506" width="130" height="24" rx="12" fill="#000"/>
+      <rect x="576" y="566" width="130" height="24" rx="12" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" fill="#000"/>
+  <g mask="url(#rules)">
+    <path d="M264 364 C 356 330, 452 346, 512 389 C 572 346, 668 330, 760 364
+             L 760 664 C 668 630, 572 646, 512 689 C 452 646, 356 630, 264 664 Z"
+          fill="#ffffff"/>
+  </g>
+</svg>

@@ -45,7 +45,16 @@
     "plugins": [
       "expo-sqlite",
       "expo-router",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#f4f5f2"
+        }
+      ]
     ]
   }
 }

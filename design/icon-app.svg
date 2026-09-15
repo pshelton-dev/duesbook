@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Duesbook">
+  <title>Duesbook</title>
+  <!-- Full bleed: iOS and Android apply their own corner mask. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#379a55"/>
+      <stop offset="1" stop-color="#2e7d46"/>
+    </linearGradient>
+    <mask id="rules">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <!-- ledger lines cut out of the pages -->
+      <rect x="248" y="418" width="176" height="30" rx="15" fill="#000"/>
+      <rect x="248" y="500" width="176" height="30" rx="15" fill="#000"/>
+      <rect x="248" y="582" width="176" height="30" rx="15" fill="#000"/>
+      <rect x="600" y="418" width="176" height="30" rx="15" fill="#000"/>
+      <rect x="600" y="500" width="176" height="30" rx="15" fill="#000"/>
+      <rect x="600" y="582" width="176" height="30" rx="15" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#g)"/>
+  <g mask="url(#rules)">
+    <!-- open book: two pages meeting at the spine, gentle page curve -->
+    <path d="M176 314 C 300 268, 430 290, 512 348 C 594 290, 724 268, 848 314
+             L 848 720 C 724 674, 594 696, 512 754 C 430 696, 300 674, 176 720 Z"
+          fill="#ffffff"/>
+  </g>
+  <!-- spine shadow so the two pages read as a book at small sizes -->
+  <path d="M512 348 L512 754" stroke="#2e7d46" stroke-opacity="0.35" stroke-width="10" stroke-linecap="round"/>
+</svg>
