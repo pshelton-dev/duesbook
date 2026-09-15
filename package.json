@@ -11,7 +11,8 @@
     "ios": "expo run:ios",
     "android": "expo run:android",
     "typecheck": "tsc --noEmit",
-    "test:data": "node scripts/test-data-layer.mjs"
+    "test:data": "node scripts/test-data-layer.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

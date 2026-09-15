@@ -178,11 +178,14 @@ Decide during build, in this order of likely value:
 ## Open items
 - [ ] Android snapshot-folder mechanism (Documents via Storage Access
       Framework vs. rely on Auto Backup alone) — confirm during build.
-- [ ] README and docs rewrite for the phone (screenshots, store links,
-      "moving from the desktop app" section). The README keeps pointing at
-      GitHub, which stays the public face while the working repo is private.
 
 ## Resolved
+- 2026-09-15: README rewritten for the phone app: phone screenshots from a
+  seeded fictional club (`npm run seed:demo`), privacy promise restated as
+  "no network requests", "Moving from the desktop app" section, local build
+  and release notes. Store links wait for the store listing. The docs folder
+  still holds the desktop getting-started guide and its screenshots; those
+  are not linked from the README.
 - 2026-09-15: license. New commits are under the **PolyForm Noncommercial
   License 1.0.0** (source-available; any noncommercial use; nobody else may
   sell it). Everything published under MIT through v1.3.0 and the
