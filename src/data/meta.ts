@@ -21,5 +21,6 @@ export function setMeta(db: Db, key: string, value: string | null): void {
 export const META = {
   lastBackupAt: 'last_backup_at',
   snapshotsEnabled: 'snapshots_enabled',
-  lastPaymentAccountId: 'last_payment_account_id'
+  lastPaymentAccountId: 'last_payment_account_id',
+  appLock: 'app_lock'
 } as const

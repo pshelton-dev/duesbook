@@ -1,6 +1,8 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { BooksProvider, useBooks } from '../src/ui/books'
+import { LockGate } from '../src/ui/lock'
+import { OpenedBooksFileHandler } from '../src/ui/open-file'
 import { color } from '../src/ui/theme'
 
 /**
@@ -43,7 +45,10 @@ function Routes(): React.JSX.Element {
 export default function RootLayout(): React.JSX.Element {
   return (
     <BooksProvider>
-      <Routes />
+      <LockGate>
+        <Routes />
+        <OpenedBooksFileHandler />
+      </LockGate>
       <StatusBar style="dark" />
     </BooksProvider>
   )

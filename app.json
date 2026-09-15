@@ -11,7 +11,23 @@
       "supportsTablet": true,
       "infoPlist": {
         "UIFileSharingEnabled": true,
-        "LSSupportsOpeningDocumentsInPlace": true
+        "LSSupportsOpeningDocumentsInPlace": true,
+        "NSFaceIDUsageDescription": "Duesbook can ask for Face ID before showing your books.",
+        "CFBundleDocumentTypes": [
+          {
+            "CFBundleTypeName": "Duesbook books",
+            "LSHandlerRank": "Owner",
+            "LSItemContentTypes": ["com.duesbook.books"]
+          }
+        ],
+        "UTExportedTypeDeclarations": [
+          {
+            "UTTypeIdentifier": "com.duesbook.books",
+            "UTTypeDescription": "Duesbook books",
+            "UTTypeConformsTo": ["public.data", "public.database"],
+            "UTTypeTagSpecification": { "public.filename-extension": ["duesbook"] }
+          }
+        ]
       }
     },
     "android": {
