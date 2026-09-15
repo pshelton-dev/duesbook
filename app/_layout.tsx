@@ -19,10 +19,6 @@ function Routes(): React.JSX.Element {
           name="payment"
           options={{ presentation: 'modal' }}
         />
-        <Stack.Screen
-          name="member-edit"
-          options={{ presentation: 'modal' }}
-        />
         {(['txn-edit', 'account-edit', 'period-edit'] as const).map((name) => (
           <Stack.Screen
             key={name}
@@ -36,9 +32,10 @@ function Routes(): React.JSX.Element {
       <Stack.Protected guard={!hasOrg}>
         <Stack.Screen name="wizard" options={{ gestureEnabled: false }} />
       </Stack.Protected>
-      {/* Reachable from the wizard too, so a new treasurer can bring the roster in on day one.
+      {/* Reachable from the wizard too, so a new treasurer can build the roster on day one.
           Declared last: with no organization the router falls back to the first available
-          screen, and that must be the wizard, not this modal. */}
+          screen, and that must be the wizard, not one of these modals. */}
+      <Stack.Screen name="member-edit" options={{ presentation: 'modal' }} />
       <Stack.Screen name="import-members" options={{ presentation: 'modal' }} />
     </Stack>
   )

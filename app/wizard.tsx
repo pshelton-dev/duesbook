@@ -265,18 +265,24 @@ export default function Wizard(): React.JSX.Element {
           {step === 4 && (
             <>
               <Text style={styles.h1}>Who are your members?</Text>
-              <Text style={styles.lead}>Bring the list in now, or add people one at a time later. Anyone on the list owes dues from the first period.</Text>
+              <Text style={styles.lead}>Add people by hand, pick them from Contacts, or bring in a spreadsheet. Anyone on the list owes dues from the first period. You can also finish with an empty list and add members later.</Text>
               <Card>
-                <ListRow onPress={() => router.push('/import-members')}>
+                <ListRow onPress={() => router.push('/member-edit')}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.name}>Import a spreadsheet</Text>
-                    <Text style={styles.hint}>A CSV with names, and optionally email, phone, address, and join date.</Text>
+                    <Text style={styles.name}>Add a member by hand</Text>
+                    <Text style={styles.hint}>Type a name; email, phone, and address are optional.</Text>
                   </View>
                 </ListRow>
-                <ListRow last onPress={fromContacts}>
+                <ListRow onPress={fromContacts}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.name}>Pick from Contacts</Text>
                     <Text style={styles.hint}>One person at a time. Duesbook asks for Contacts access only when you tap this.</Text>
+                  </View>
+                </ListRow>
+                <ListRow last onPress={() => router.push('/import-members')}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.name}>Import a spreadsheet</Text>
+                    <Text style={styles.hint}>A CSV with names, and optionally email, phone, address, and join date.</Text>
                   </View>
                 </ListRow>
               </Card>
