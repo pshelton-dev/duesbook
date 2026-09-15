@@ -4,7 +4,7 @@
   "description": "Local-first books for small-organization treasurers: accounts, members, dues. On your phone.",
   "main": "expo-router/entry",
   "author": "Paul Shelton",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "private": true,
   "scripts": {
     "start": "expo start",

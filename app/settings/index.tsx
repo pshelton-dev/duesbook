@@ -90,7 +90,7 @@ export default function SettingsHome(): React.JSX.Element {
 
         <Text style={styles.cap}>About</Text>
         <Card>
-          <Row title={`Duesbook ${Constants.expoConfig?.version ?? ''}`} sub="Free and open source · MIT license" />
+          <Row title={`Duesbook ${Constants.expoConfig?.version ?? ''}`} sub="Source-available · PolyForm Noncommercial 1.0.0" />
           <Row title="Privacy" sub="Nothing leaves this phone except your own iCloud copies" last />
         </Card>
       </Screen>

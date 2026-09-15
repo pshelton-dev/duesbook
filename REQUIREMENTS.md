@@ -176,26 +176,6 @@ Decide during build, in this order of likely value:
   token system already isolates colors.
 
 ## Open items
-- [ ] **License, before the store release (2026-09-15).** The plan is to
-      charge for the app in the stores, which reverses v1's "free, open
-      source, MIT" decision. Constraints to settle it against:
-      - MIT is irrevocable for everything already published: v1.0–v1.3.0
-        and every commit on the public GitHub mirror up to the change stay
-        MIT forever. Only code committed *after* a new LICENSE lands is
-        covered by the new terms.
-      - A paid store app and public source are not contradictory (many
-        apps sell the convenience of the store build), but MIT lets anyone
-        ship the same code under another name. Source-available licenses
-        that forbid that: PolyForm Noncommercial, Business Source License
-        (with a delayed MIT/Apache fallback), or a plain proprietary
-        notice with the repo made private.
-      - The README's trust story ("this repository is the entire app") and
-        the privacy claims lean on public source. A source-available
-        license keeps that; going private loses it.
-      - The `desktop-final` branch and tags can stay MIT regardless.
-      Decide the license text, update LICENSE, package.json `license`,
-      the Settings → About line, and the README before the first
-      TestFlight build goes to anyone outside the pilot.
 - [ ] Android snapshot-folder mechanism (Documents via Storage Access
       Framework vs. rely on Auto Backup alone) — confirm during build.
 - [ ] README and docs rewrite for the phone (screenshots, store links,
@@ -203,6 +183,11 @@ Decide during build, in this order of likely value:
       GitHub, which stays the public face while the working repo is private.
 
 ## Resolved
+- 2026-09-15: license. New commits are under the **PolyForm Noncommercial
+  License 1.0.0** (source-available; any noncommercial use; nobody else may
+  sell it). Everything published under MIT through v1.3.0 and the
+  `desktop-final` branch stays MIT. Updated LICENSE, package.json, the
+  Settings → About line, and the README's License section.
 - 2026-09-13: platforms, stack, desktop fate, and backup story decided in a
   structured decision round; see "Locked decisions" above.
 - 2026-09-13: application name stays **Duesbook**. App Store name

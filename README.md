@@ -105,4 +105,10 @@ design decisions.
 
 ## License
 
-[MIT](LICENSE)
+Duesbook is source-available under the
+[PolyForm Noncommercial License 1.0.0](LICENSE). You can read it, build it,
+change it, and run it for any noncommercial purpose; the paid app in the
+stores is the only commercial distribution.
+
+Versions through 1.3.0 (the desktop app, kept on the `desktop-final` branch
+and its tags) were released under the MIT license and remain so.
