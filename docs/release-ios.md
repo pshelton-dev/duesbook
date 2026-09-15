@@ -61,3 +61,31 @@ filled in and one Beta App Review per version. Builds expire after 90 days.
 `npm run ios` builds and installs the development client on the booted
 simulator and starts Metro. Expo Go is not used: it cannot carry the app's
 document type, file-sharing keys, or entitlements.
+
+## App Store screenshots
+
+The store listing takes up to ten screenshots per device size. The set is
+produced from simulator captures over the fictional demo club, composed with
+a headline on the brand green by `scripts/store-screenshots/compose-all.sh`.
+
+1. **Build Release for the simulator** so there is no developer overlay:
+   `npx expo run:ios --device <udid> --configuration Release --no-bundler`.
+   The app lands in `DerivedData/Duesbook-*/Build/Products/Release-iphonesimulator/Duesbook.app`
+   and installs on any simulator with `xcrun simctl install <udid> <that .app>`.
+2. **Devices.** An iPhone 14 Plus simulator (1284 × 2778) and an iPad Air
+   13-inch (2048 × 2732); both sizes are accepted by App Store Connect as
+   they are. Boot both and install the app on each.
+3. **Seed the demo books** into each app container, with the app closed:
+   `npm run seed:demo -- "$(xcrun simctl get_app_container <udid> com.duesbook.app data)/Library/Duesbook/duesbook.db"`.
+4. **Status bar.** `xcrun simctl status_bar <udid> override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularMode active --cellularBars 4`.
+5. **Capture** each screen with `xcrun simctl io <udid> screenshot build/store/raw/<device>-<screen>.png`,
+   where `<device>` is `phone` or `ipad` and `<screen>` is one of the names
+   in `compose-all.sh` (home, dues, payment, members, member, ledger,
+   reports, backups). Reach the screens with the tab bar and taps; deep
+   links (`xcrun simctl openurl <udid> duesbook:///dues`) work but iOS asks
+   "Open in Duesbook?" each time. For `payment`, add two members who owe.
+6. **Compose:** `scripts/store-screenshots/compose-all.sh` writes the
+   finished PNGs to `build/store/out/`, numbered in store order.
+
+The iPad set uses the phone layout at full width; a true tablet layout is
+still on the list.
