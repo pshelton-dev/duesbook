@@ -19,3 +19,4 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 .env*.local
+build/
