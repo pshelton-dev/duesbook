@@ -22,6 +22,8 @@ type Stage = 'pick' | 'names' | 'details' | 'review' | 'done'
 
 export default function ImportMembers(): React.JSX.Element {
   const router = useRouter()
+  /** Falls back to the root when this modal is the first screen (nothing to go back to). */
+  const close = (): void => (router.canGoBack() ? router.back() : router.replace('/'))
   const insets = useSafeAreaInsets()
   const { db, bump } = useBooks()
 
@@ -96,7 +98,7 @@ export default function ImportMembers(): React.JSX.Element {
     <View style={[styles.screen, { paddingTop: Math.min(insets.top, 12) }]}>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <View style={styles.head}>
-          <Button title={stage === 'done' ? 'Done' : 'Cancel'} kind="link" onPress={() => router.back()} />
+          <Button title={stage === 'done' ? 'Done' : 'Cancel'} kind="link" onPress={close} />
           <Text style={styles.title}>Import members</Text>
           <View style={{ width: 60 }} />
         </View>
@@ -201,7 +203,7 @@ export default function ImportMembers(): React.JSX.Element {
           {stage === 'names' && <Button title="Next" kind="primary" disabled={!namesOk} onPress={() => setStage('details')} style={{ flex: 2 }} />}
           {stage === 'details' && <Button title="Next" kind="primary" onPress={toReview} style={{ flex: 2 }} />}
           {stage === 'review' && <Button title={`Import ${members.length} member${members.length === 1 ? '' : 's'}`} kind="primary" onPress={doImport} style={{ flex: 2 }} />}
-          {stage === 'done' && <Button title="Done" kind="primary" onPress={() => router.back()} style={{ flex: 1 }} />}
+          {stage === 'done' && <Button title="Done" kind="primary" onPress={close} style={{ flex: 1 }} />}
         </View>
       </ScrollView>
     </View>

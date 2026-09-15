@@ -13,8 +13,6 @@ function Routes(): React.JSX.Element {
   const { hasOrg } = useBooks()
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
-      {/* Reachable from the wizard too, so a new treasurer can bring the roster in on day one. */}
-      <Stack.Screen name="import-members" options={{ presentation: 'modal' }} />
       <Stack.Protected guard={hasOrg}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
@@ -38,6 +36,10 @@ function Routes(): React.JSX.Element {
       <Stack.Protected guard={!hasOrg}>
         <Stack.Screen name="wizard" options={{ gestureEnabled: false }} />
       </Stack.Protected>
+      {/* Reachable from the wizard too, so a new treasurer can bring the roster in on day one.
+          Declared last: with no organization the router falls back to the first available
+          screen, and that must be the wizard, not this modal. */}
+      <Stack.Screen name="import-members" options={{ presentation: 'modal' }} />
     </Stack>
   )
 }
