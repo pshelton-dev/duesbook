@@ -8,6 +8,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
+      "bundleIdentifier": "com.duesbook.app",
       "supportsTablet": true,
       "infoPlist": {
         "UIFileSharingEnabled": true,
@@ -31,6 +32,7 @@
       }
     },
     "android": {
+      "package": "com.duesbook.app",
       "adaptiveIcon": {
         "backgroundColor": "#f4f5f2",
         "foregroundImage": "./assets/android-icon-foreground.png",
